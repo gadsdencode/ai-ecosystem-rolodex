@@ -12,9 +12,10 @@ interface DetailModalProps {
   onClose: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  readOnly?: boolean;
 }
 
-export function DetailModal({ isOpen, tool, onClose, onEdit, onDelete }: DetailModalProps) {
+export function DetailModal({ isOpen, tool, onClose, onEdit, onDelete, readOnly = false }: DetailModalProps) {
   const [aiSuggestions, setAiSuggestions] = useState<string | null>(null);
   const [isFetchingSuggestions, setIsFetchingSuggestions] = useState(false);
 
@@ -169,24 +170,26 @@ export function DetailModal({ isOpen, tool, onClose, onEdit, onDelete }: DetailM
               </a>
             </div>
             
-            <div className="mt-6 flex space-x-3">
-              <button 
-                type="button" 
-                onClick={onEdit}
-                className="flex-1 px-4 py-2.5 bg-gray-200 text-gray-800 rounded-lg font-medium hover:bg-gray-300 transition-colors duration-200 flex justify-center items-center"
-              >
-                <Edit className="w-4 h-4 mr-1.5" />
-                Edit
-              </button>
-              <button 
-                type="button" 
-                onClick={onDelete}
-                className="flex-1 px-4 py-2.5 bg-red-100 text-apple-red rounded-lg font-medium hover:bg-red-200 transition-colors duration-200 flex justify-center items-center"
-              >
-                <Trash2 className="w-4 h-4 mr-1.5" />
-                Delete
-              </button>
-            </div>
+            {!readOnly && (
+              <div className="mt-6 flex space-x-3">
+                <button 
+                  type="button" 
+                  onClick={onEdit}
+                  className="flex-1 px-4 py-2.5 bg-gray-200 text-gray-800 rounded-lg font-medium hover:bg-gray-300 transition-colors duration-200 flex justify-center items-center"
+                >
+                  <Edit className="w-4 h-4 mr-1.5" />
+                  Edit
+                </button>
+                <button 
+                  type="button" 
+                  onClick={onDelete}
+                  className="flex-1 px-4 py-2.5 bg-red-100 text-apple-red rounded-lg font-medium hover:bg-red-200 transition-colors duration-200 flex justify-center items-center"
+                >
+                  <Trash2 className="w-4 h-4 mr-1.5" />
+                  Delete
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
