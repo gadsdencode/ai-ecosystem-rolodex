@@ -1,0 +1,64 @@
+Objective
+Create an ultra-modern, sleek "AI Ecosystem Rolodex" web application that serves as a one-stop-shop for organizing and accessing all AI applications in my ecosystem. The application should have an Apple/Mac-inspired minimalist aesthetic with clean lines, subtle animations, and intuitive navigation.
+Context
+This application will be used to catalog, organize, and quickly access various AI tools and applications that I use regularly. I need a centralized hub that displays these applications in a visually appealing manner, similar to how Apple showcases apps in their ecosystem. Users should be able to categorize AI tools, add notes about their functionality, and quickly access them with minimal friction.
+Instructions
+
+Build a responsive single-page application using Vite, TypeScript, and TailwindCSS that maintains the Apple/Mac aesthetic:
+
+Implement a light color scheme with subtle gradients
+Use SF Pro-inspired typography (or system fonts that closely match)
+Create smooth transitions and animations for interactive elements
+Design with appropriate white space and visual hierarchy
+
+
+Create these core features:
+
+A dashboard view with a grid/card layout of AI applications
+Detail view for each AI tool with expanded information
+Add/Edit/Delete functionality for applications
+Categorization and filtering system
+Search functionality for quickly finding applications
+Tags/labels for organizing applications by use case or functionality
+
+
+Each AI application entry should include:
+
+Name and icon/logo
+Description
+URL/access link
+Category/tags
+Usage notes
+Date added/modified
+
+
+Implement data persistence using the built-in Replit database to store all application data.
+Create a clean, intuitive UI with:
+
+Frosted glass effects for cards and navigation
+Subtle drop shadows and rounded corners
+Responsive design that works on both desktop and mobile devices
+Keyboard shortcuts for power users
+
+
+
+Constraints
+
+Use only Vite, TypeScript, TailwindCSS, and the built-in Replit database - avoid introducing unnecessary dependencies.
+Ensure the application loads quickly and performs well, even with many AI applications stored.
+Keep the codebase well-organized and documented for future maintenance.
+Implement proper form validation and error handling.
+Design the application to be usable without requiring backend services beyond the Replit database.
+
+Desired Output
+The final deliverable should be a fully functional web application with:
+
+A polished UI that matches the Apple/Mac aesthetic while maintaining readability and usability
+Complete CRUD functionality for managing AI applications
+Responsive design that works on various screen sizes
+Proper data validation and error handling
+Well-documented code with clear TypeScript types
+Basic user documentation explaining how to use the application
+Initial seed data with 5-10 example AI applications to demonstrate functionality
+
+The application should start up correctly when run and maintain all data between sessions using the Replit database. All interactive elements should provide appropriate visual feedback, and the overall experience should feel premium and refined.
