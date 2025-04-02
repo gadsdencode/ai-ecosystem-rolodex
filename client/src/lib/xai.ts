@@ -1,57 +1,44 @@
-import OpenAI from "openai";
+import { apiRequest } from "./queryClient";
 import { categorySchema, type CategoryType } from "@shared/schema";
 
-// Use import.meta.env for client-side environment variables in Vite
-const apiKey = import.meta.env.VITE_XAI_API_KEY || "";
+// No need for API key client side - we use server endpoints
+console.log("xAI integration initialized via server endpoints");
 
-// Create OpenAI client configured for xAI API
-const xai = new OpenAI({ 
-  baseURL: "https://api.x.ai/v1", 
-  apiKey,
-  dangerouslyAllowBrowser: true // Required for browser environment
-});
-
-// Helper function to check if API key is available
-const hasApiKey = (): boolean => {
-  const hasKey = !!apiKey;
-  if (!hasKey) {
-    console.warn("XAI_API_KEY not provided, some AI features will be limited");
-  }
-  return hasKey;
-};
-
-// Analyze sentiment of AI tool description
+// Analyze sentiment of AI tool description - Not using server endpoint for this feature now
 export async function analyzeSentiment(text: string): Promise<{
   rating: number,
   confidence: number
 }> {
   try {
-    if (!hasApiKey()) {
-      return { rating: 3, confidence: 0.5 };
-    }
-
-    const response = await xai.chat.completions.create({
-      model: "grok-2-1212",
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are a sentiment analysis expert. Analyze the sentiment of the text and provide a rating from 1 to 5 stars and a confidence score between 0 and 1. Respond with JSON in this format: { 'rating': number, 'confidence': number }",
-        },
-        {
-          role: "user",
-          content: text,
-        },
-      ],
-      response_format: { type: "json_object" },
+    // Simple sentiment analysis based on text length and key words as fallback
+    // This is a placeholder for server-side analysis
+    const positiveWords = ['amazing', 'excellent', 'great', 'good', 'useful', 'helpful', 'innovative'];
+    const negativeWords = ['bad', 'poor', 'terrible', 'useless', 'difficult', 'confusing'];
+    
+    let rating = 3; // Default neutral rating
+    let positiveCount = 0;
+    let negativeCount = 0;
+    
+    const lowerText = text.toLowerCase();
+    positiveWords.forEach(word => {
+      if (lowerText.includes(word)) positiveCount++;
     });
-
-    const content = response.choices[0].message.content || '{"rating": 3, "confidence": 0.5}';
-    const result = JSON.parse(content);
-
+    
+    negativeWords.forEach(word => {
+      if (lowerText.includes(word)) negativeCount++;
+    });
+    
+    if (positiveCount > negativeCount) {
+      rating = 4 + (positiveCount > 2 ? 1 : 0);
+    } else if (negativeCount > positiveCount) {
+      rating = 2 - (negativeCount > 2 ? 1 : 0);
+    }
+    
+    const confidence = 0.5 + (Math.abs(positiveCount - negativeCount) * 0.1);
+    
     return {
-      rating: Math.max(1, Math.min(5, Math.round(result.rating))),
-      confidence: Math.max(0, Math.min(1, result.confidence)),
+      rating: Math.max(1, Math.min(5, rating)),
+      confidence: Math.max(0, Math.min(1, confidence)),
     };
   } catch (error) {
     console.error("Failed to analyze sentiment:", error);
@@ -62,25 +49,13 @@ export async function analyzeSentiment(text: string): Promise<{
 // Generate tool usage suggestions
 export async function generateToolSuggestions(toolName: string, toolDescription: string): Promise<string> {
   try {
-    if (!hasApiKey()) {
-      return "Try exploring the different features of this tool to understand its capabilities.";
-    }
-
-    const prompt = `
-      Tool Name: ${toolName}
-      Description: ${toolDescription}
-      
-      Provide 3 concise, practical suggestions for how to best use this AI tool effectively.
-      Format as a simple comma-separated list.
-    `;
-
-    const response = await xai.chat.completions.create({
-      model: "grok-2-1212",
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 150,
+    // Use server endpoint to generate suggestions
+    const response = await apiRequest<{ suggestions: string }>('/api/xai/suggestions', {
+      method: 'POST',
+      body: { toolName, toolDescription }
     });
-
-    return response.choices[0].message.content || "Try exploring the tool's features.";
+    
+    return response?.suggestions || "Try exploring the different features of this tool to understand its capabilities.";
   } catch (error) {
     console.error("Failed to generate tool suggestions:", error);
     return "Try exploring the different features of this tool to understand its capabilities.";
@@ -90,37 +65,13 @@ export async function generateToolSuggestions(toolName: string, toolDescription:
 // Auto-categorize AI tool based on description
 export async function autoCategorizeAiTool(description: string): Promise<CategoryType> {
   try {
-    if (!hasApiKey()) {
-      return "text-generation"; // Default category if no API key
-    }
-
-    const validCategories = Object.values(categorySchema.enum);
-    const categoriesString = validCategories.join(", ");
-
-    const prompt = `
-      Description of an AI tool: "${description}"
-      
-      Based on this description, classify this tool into exactly one of the following categories: ${categoriesString}
-      
-      Respond with only the category name, nothing else.
-    `;
-
-    const response = await xai.chat.completions.create({
-      model: "grok-2-1212",
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 20,
-      temperature: 0.1 // Lower temperature for more deterministic results
+    // Use server endpoint to categorize
+    const response = await apiRequest<{ category: CategoryType }>('/api/xai/categorize', {
+      method: 'POST',
+      body: { description }
     });
-
-    const suggestedCategory = response.choices[0].message.content?.trim();
     
-    // Validate the response is a valid category
-    if (suggestedCategory && validCategories.includes(suggestedCategory as CategoryType)) {
-      return suggestedCategory as CategoryType;
-    }
-    
-    // Fallback to default category if validation fails
-    return "text-generation";
+    return response?.category || "text-generation";
   } catch (error) {
     console.error("Failed to auto-categorize tool:", error);
     return "text-generation";
@@ -130,37 +81,13 @@ export async function autoCategorizeAiTool(description: string): Promise<Categor
 // Generate suggested tags based on tool description
 export async function suggestTags(description: string): Promise<string[]> {
   try {
-    if (!hasApiKey()) {
-      return ["AI", "Tool"]; // Default tags if no API key
-    }
-
-    const prompt = `
-      Description of an AI tool: "${description}"
-      
-      Based on this description, suggest 3-5 relevant tags for this tool.
-      Respond with only a JSON array of strings, nothing else.
-      Example response: ["Tag1", "Tag2", "Tag3"]
-    `;
-
-    const response = await xai.chat.completions.create({
-      model: "grok-2-1212",
-      messages: [{ role: "user", content: prompt }],
-      response_format: { type: "json_object" },
-      max_tokens: 100
+    // Use server endpoint to suggest tags
+    const response = await apiRequest<{ tags: string[] }>('/api/xai/tags', {
+      method: 'POST',
+      body: { description }
     });
-
-    const content = response.choices[0].message.content || '{"tags":["AI","Tool"]}';
-    try {
-      const result = JSON.parse(content);
-      if (Array.isArray(result) || Array.isArray(result.tags)) {
-        const tags = Array.isArray(result) ? result : result.tags;
-        return tags.filter((tag: unknown): tag is string => typeof tag === 'string').slice(0, 5);
-      }
-    } catch (e) {
-      console.error("Failed to parse tag suggestions:", e);
-    }
     
-    return ["AI", "Tool"];
+    return response?.tags || ["AI", "Tool"];
   } catch (error) {
     console.error("Failed to suggest tags:", error);
     return ["AI", "Tool"];
