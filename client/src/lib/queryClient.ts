@@ -23,15 +23,20 @@ export async function apiRequest<T = any>(
     headers['Content-Type'] = 'application/json';
   }
   
-  const res = await fetch(url, {
-    method,
-    headers,
-    body: body ? JSON.stringify(body) : undefined,
-    credentials: "include",
-  });
-
-  await throwIfResNotOk(res);
-  return await res.json();
+  try {
+    const res = await fetch(url, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+      credentials: "include",
+    });
+  
+    await throwIfResNotOk(res);
+    return await res.json();
+  } catch (error) {
+    console.error(`API Request Error (${method} ${url}):`, error);
+    throw error;
+  }
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";

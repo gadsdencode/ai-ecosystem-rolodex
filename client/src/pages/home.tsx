@@ -92,6 +92,8 @@ export default function Home() {
 
   const handleAddEditSubmit = async (data: AiToolFormData) => {
     try {
+      console.log(`Submitting form data (${modalMode}):`, data);
+      
       if (modalMode === 'add') {
         await addAiTool(data);
         toast({
@@ -107,6 +109,7 @@ export default function Home() {
       }
       setAddEditModalOpen(false);
     } catch (err) {
+      console.error('Form submission error:', err);
       toast({
         title: "An error occurred",
         description: `Failed to ${modalMode === 'add' ? 'add' : 'update'} the tool. Please try again.`,

@@ -18,8 +18,15 @@ export function useAiTools() {
   // Mutation to add a new AI tool
   const { mutateAsync: addAiTool, isPending: isAdding } = useMutation({
     mutationFn: async (toolData: AiToolFormData) => {
-      const response = await apiRequest('POST', '/api/tools', toolData);
-      return response.json();
+      try {
+        return await apiRequest<AiTool>('/api/tools', {
+          method: 'POST',
+          body: toolData
+        });
+      } catch (error) {
+        console.error("Error adding AI tool:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tools'] });
@@ -29,8 +36,15 @@ export function useAiTools() {
   // Mutation to update an existing AI tool
   const { mutateAsync: updateAiTool, isPending: isUpdating } = useMutation({
     mutationFn: async ({ id, data }: { id: number, data: AiToolFormData }) => {
-      const response = await apiRequest('PUT', `/api/tools/${id}`, data);
-      return response.json();
+      try {
+        return await apiRequest<AiTool>(`/api/tools/${id}`, {
+          method: 'PUT',
+          body: data
+        });
+      } catch (error) {
+        console.error("Error updating AI tool:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tools'] });
@@ -40,7 +54,14 @@ export function useAiTools() {
   // Mutation to delete an AI tool
   const { mutateAsync: deleteAiTool, isPending: isDeleting } = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest('DELETE', `/api/tools/${id}`);
+      try {
+        await apiRequest(`/api/tools/${id}`, {
+          method: 'DELETE'
+        });
+      } catch (error) {
+        console.error("Error deleting AI tool:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tools'] });

@@ -61,6 +61,13 @@ export function AddEditModal({ isOpen, mode, currentTool, onClose, onSubmit }: A
   }, [currentTool, mode, isOpen, reset]);
 
   const handleFormSubmit = (data: any) => {
+    // Ensure tags are properly formatted for submission
+    // Convert comma-separated string to array if not already
+    if (typeof data.tags === 'string') {
+      data.tags = data.tags.split(',').map((tag: string) => tag.trim()).filter(Boolean);
+    }
+    
+    console.log('Form data before submission:', data);
     onSubmit(data);
   };
 
