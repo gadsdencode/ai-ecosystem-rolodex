@@ -106,7 +106,7 @@ export function AiCard({ tool, onEdit, onDelete, onClick }: AiCardProps) {
       </div>
       <div className="p-5">
         <div className="flex justify-between items-start">
-          <h3 className="text-lg font-semibold mb-2 text-gray-900">{tool.name}</h3>
+          <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">{tool.name}</h3>
           <motion.span 
             className={`px-2 py-1 bg-${CATEGORY_COLORS[tool.category as keyof typeof CATEGORY_COLORS]}-100 text-${CATEGORY_COLORS[tool.category as keyof typeof CATEGORY_COLORS]}-800 rounded-md text-xs font-medium`}
             whileHover={{ scale: 1.05 }}
