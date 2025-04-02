@@ -100,13 +100,13 @@ export function DetailModal({ isOpen, tool, onClose, onEdit, onDelete }: DetailM
           
           <div className="p-6">
             <div className="flex items-start justify-between mb-3">
-              <h2 className="text-2xl font-semibold text-gray-900">{tool.name}</h2>
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-400">{tool.name}</h2>
               <span className={`px-2.5 py-1 bg-${categoryColor}-100 text-${categoryColor}-800 rounded-md text-sm font-medium`}>
                 {categoryDisplay}
               </span>
             </div>
             
-            <p className="text-gray-700 mb-5">{tool.description}</p>
+            <p className="text-gray-700 mb-5 dark:text-white">{tool.description}</p>
             
             {/* AI-powered usage suggestions */}
             <div className="mb-5">
@@ -156,7 +156,7 @@ export function DetailModal({ isOpen, tool, onClose, onEdit, onDelete }: DetailM
             <div className="border-t border-gray-200 pt-4 flex justify-between">
               <div>
                 <h3 className="text-xs font-medium text-apple-gray mb-1">ADDED</h3>
-                <p className="text-sm text-gray-700">{formattedDate}</p>
+                <p className="text-sm text-gray-700 dark:text-gray-300">{formattedDate}</p>
               </div>
               <a 
                 href={tool.url} 

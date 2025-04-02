@@ -137,6 +137,21 @@ export default function Home() {
     }
   };
 
+  // Listen for the custom "setCategory" event
+  useEffect(() => {
+    const handleSetCategory = (e: CustomEvent) => {
+      setActiveCategory(e.detail);
+    };
+    
+    // Add event listener
+    window.addEventListener('setCategory', handleSetCategory as EventListener);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('setCategory', handleSetCategory as EventListener);
+    };
+  }, []);
+
   // Show error toast if API error occurs
   useEffect(() => {
     if (error) {
