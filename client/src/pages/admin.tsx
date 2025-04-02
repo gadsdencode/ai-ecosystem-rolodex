@@ -13,6 +13,7 @@ import { useKeyboardShortcuts } from '../hooks/use-keyboard-shortcuts';
 import { ALL_CATEGORIES } from '../types';
 import { PlusCircle, LogOut } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Admin() {
   const { toast } = useToast();
@@ -140,9 +141,13 @@ export default function Admin() {
   };
 
   // Logout handler
+  const { logout } = useAuth();
   const handleLogout = () => {
-    // In a real app with authentication, we would call a logout API endpoint
-    // For now, we'll just redirect to the public page
+    logout();
+    toast({
+      title: "Logged Out",
+      description: "You have been successfully logged out",
+    });
     setLocation('/');
   };
 

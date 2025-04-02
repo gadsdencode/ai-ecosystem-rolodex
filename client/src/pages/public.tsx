@@ -1,17 +1,16 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'wouter';
 import { AppHeader } from '../components/app-header';
 import { CategoryFilters } from '../components/category-filters';
 import { DetailModal } from '../components/detail-modal';
+import { KeyboardShortcutsModal } from '../components/keyboard-shortcuts-modal';
 import { AiTool } from '@shared/schema';
 import { useAiTools } from '../hooks/use-ai-tools';
 import { ALL_CATEGORIES } from '../types';
-import { useToast } from '@/hooks/use-toast';
-import { KeyboardShortcutsModal } from '../components/keyboard-shortcuts-modal';
-import { Link } from 'wouter';
-import { motion, AnimatePresence } from 'framer-motion';
-import { AiCard } from '../components/ai-card';
-import { EmptyState } from '../components/empty-state';
 import { UserCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { motion, AnimatePresence } from 'framer-motion';
+import { EmptyState } from '@/components/empty-state';
 
 export default function Public() {
   const { toast } = useToast();
@@ -95,11 +94,11 @@ export default function Public() {
         {/* Header with Login Link */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-medium text-gray-900">AI Tool Directory</h2>
-          <Link href="/admin">
-            <a className="px-4 py-2 text-apple-blue border border-apple-blue rounded-lg flex items-center hover:bg-blue-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-apple-blue focus:ring-opacity-50">
+          <Link href="/login">
+            <button className="px-4 py-2 text-apple-blue border border-apple-blue rounded-lg flex items-center hover:bg-blue-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-apple-blue focus:ring-opacity-50">
               <UserCircle className="w-5 h-5 mr-1.5" />
               Admin Login
-            </a>
+            </button>
           </Link>
         </div>
 
