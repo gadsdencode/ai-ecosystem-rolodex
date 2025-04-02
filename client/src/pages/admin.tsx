@@ -193,9 +193,9 @@ export default function Admin() {
           <div className="flex items-center">
             <h2 className="text-xl font-medium text-gray-900">Admin Dashboard</h2>
             <Link href="/">
-              <a className="ml-4 text-sm text-apple-blue hover:underline">
+              <button className="ml-4 text-sm text-apple-blue hover:underline bg-transparent border-none cursor-pointer">
                 View Public Site
-              </a>
+              </button>
             </Link>
           </div>
           <div className="flex items-center space-x-4">
