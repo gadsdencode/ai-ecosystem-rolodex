@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Search } from 'lucide-react';
+import { Search, Sun, Moon, Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface AppHeaderProps {
   searchQuery: string;
@@ -8,8 +9,10 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({ searchQuery, setSearchQuery }: AppHeaderProps) {
+  const { theme, toggleTheme } = useTheme();
   const [showSearchShortcut, setShowSearchShortcut] = useState(true);
   const [isSearchActive, setIsSearchActive] = useState(false);
+  const [showThemeMenu, setShowThemeMenu] = useState(false);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -23,6 +26,10 @@ export function AppHeader({ searchQuery, setSearchQuery }: AppHeaderProps) {
   const handleSearchBlur = () => {
     setShowSearchShortcut(!searchQuery);
     setIsSearchActive(false);
+  };
+  
+  const handleToggleThemeMenu = () => {
+    setShowThemeMenu(!showThemeMenu);
   };
 
   // Register keyboard shortcut
@@ -127,9 +134,31 @@ export function AppHeader({ searchQuery, setSearchQuery }: AppHeaderProps) {
     }
   };
 
+  // Theme toggle menu animation
+  const themeMenuVariants = {
+    hidden: { opacity: 0, scale: 0.8, y: -20 },
+    visible: { 
+      opacity: 1, 
+      scale: 1,
+      y: 0,
+      transition: { type: "spring", duration: 0.3, bounce: 0.5 }
+    },
+    exit: { 
+      opacity: 0, 
+      scale: 0.8,
+      y: -20,
+      transition: { duration: 0.2 }
+    }
+  };
+
   return (
     <motion.header 
-      className="sticky top-0 z-30 bg-white bg-opacity-70 backdrop-blur-[10px] border-b border-gray-200 px-4 sm:px-6 md:px-8"
+      className={`
+        sticky top-0 z-30 backdrop-blur-[10px] px-4 sm:px-6 md:px-8 transition-colors duration-300
+        ${theme === 'light' 
+          ? 'bg-white bg-opacity-70 border-b border-gray-200' 
+          : 'bg-gray-900 bg-opacity-70 border-b border-gray-800'}
+      `}
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
@@ -160,14 +189,24 @@ export function AppHeader({ searchQuery, setSearchQuery }: AppHeaderProps) {
               animate="visible"
             />
           </motion.svg>
+          <div className='flex flex-col'>
           <motion.h1 
             className="ml-3 text-2xl font-medium"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5, duration: 0.5 }}
           >
-            AI Ecosystem Rolodex
+            AI Rolodex
           </motion.h1>
+          <motion.h2 
+            className={`ml-3 text-xl font-medium ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5, duration: 0.5 }}
+          >
+            Kainbridge Ecosystem
+          </motion.h2>
+            </div>
         </motion.div>
         
         {/* Search Bar */}
@@ -181,7 +220,7 @@ export function AppHeader({ searchQuery, setSearchQuery }: AppHeaderProps) {
             <motion.div
               animate={{ 
                 scale: isSearchActive ? 1.1 : 1,
-                color: isSearchActive ? '#3b82f6' : '#6b7280'
+                color: isSearchActive ? theme === 'light' ? '#3b82f6' : '#60a5fa' : theme === 'light' ? '#6b7280' : '#9ca3af'
               }}
             >
               <Search className="w-5 h-5" />
@@ -195,13 +234,25 @@ export function AppHeader({ searchQuery, setSearchQuery }: AppHeaderProps) {
             onFocus={handleSearchFocus}
             onBlur={handleSearchBlur}
             placeholder="Search AI tools..." 
-            className="pl-10 pr-10 py-2.5 w-full rounded-lg border border-gray-300 focus:ring-apple-blue focus:border-apple-blue bg-white bg-opacity-80 backdrop-blur-sm"
+            className={`
+              pl-10 pr-10 py-2.5 w-full rounded-lg 
+              focus:ring-apple-blue focus:border-apple-blue 
+              transition-colors duration-300
+              ${theme === 'light' 
+                ? 'border border-gray-300 bg-white bg-opacity-80 backdrop-blur-sm' 
+                : 'border border-gray-700 bg-gray-800 bg-opacity-70 text-white placeholder-gray-400'}
+            `}
             whileFocus={{ scale: 1.02 }}
           />
           <AnimatePresence>
             {showSearchShortcut && (
               <motion.div 
-                className="absolute right-2.5 top-2.5 text-xs text-apple-gray bg-gray-50 px-1.5 py-0.5 rounded-md"
+                className={`
+                  absolute right-2.5 top-2.5 text-xs px-1.5 py-0.5 rounded-md
+                  ${theme === 'light' 
+                    ? 'text-apple-gray bg-gray-50' 
+                    : 'text-gray-400 bg-gray-700'}
+                `}
                 variants={shortcutVariants}
                 initial="hidden"
                 animate="visible"
@@ -213,25 +264,85 @@ export function AppHeader({ searchQuery, setSearchQuery }: AppHeaderProps) {
           </AnimatePresence>
         </motion.div>
         
-        {/* Settings */}
+        {/* Theme Toggle and Settings */}
         <motion.div 
-          className="flex items-center"
+          className="flex items-center space-x-2"
           variants={settingsVariants}
           initial="hidden"
           animate="visible"
         >
+          {/* Theme toggle button */}
+          <motion.button
+            onClick={toggleTheme}
+            className={`
+              rounded-full p-1.5 transition-colors duration-200
+              ${theme === 'light' 
+                ? 'text-yellow-500 hover:bg-yellow-100' 
+                : 'text-blue-400 hover:bg-gray-800'}
+            `}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+          >
+            {theme === 'light' ? (
+              <Sun className="w-5 h-5" />
+            ) : (
+              <Moon className="w-5 h-5" />
+            )}
+          </motion.button>
+          
+          {/* Settings button */}
           <motion.button 
-            className="ml-4 rounded-full p-1.5 text-apple-gray hover:bg-gray-200 transition-colors duration-200" 
+            className={`
+              ml-2 rounded-full p-1.5 transition-colors duration-200
+              ${theme === 'light' 
+                ? 'text-apple-gray hover:bg-gray-200' 
+                : 'text-gray-400 hover:bg-gray-800'}
+            `}
             aria-label="Settings"
+            onClick={handleToggleThemeMenu}
             variants={settingsVariants}
             whileHover="hover"
             whileTap="tap"
           >
-            <svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
+            <Settings className="w-5 h-5" />
           </motion.button>
+          
+          {/* Theme menu dropdown (can be expanded later) */}
+          <AnimatePresence>
+            {showThemeMenu && (
+              <motion.div
+                className={`
+                  absolute top-16 right-4 p-4 rounded-lg shadow-lg z-50
+                  ${theme === 'light' 
+                    ? 'bg-white border border-gray-200' 
+                    : 'bg-gray-800 border border-gray-700'}
+                `}
+                variants={themeMenuVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+              >
+                <div className="font-medium mb-2">
+                  {theme === 'light' ? 'Light Mode' : 'Dark Mode'} Active
+                </div>
+                <div className="text-sm text-gray-500 mb-3">
+                  Click the {theme === 'light' ? 'sun' : 'moon'} icon to toggle theme
+                </div>
+                <button
+                  onClick={() => setShowThemeMenu(false)}
+                  className={`
+                    text-sm px-3 py-1 rounded
+                    ${theme === 'light' 
+                      ? 'bg-gray-100 hover:bg-gray-200 text-gray-700' 
+                      : 'bg-gray-700 hover:bg-gray-600 text-gray-300'}
+                  `}
+                >
+                  Close
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
       </div>
     </motion.header>

@@ -25,6 +25,28 @@
     --ring: 209 100% 45%;
     --radius: 0.5rem;
   }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 209 100% 45%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 209 100% 45%;
+  }
 }
 
 @layer base {
@@ -33,7 +55,11 @@
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-sans antialiased bg-background text-foreground transition-colors duration-300;
+  }
+  
+  /* Light theme background */
+  .light body {
     background-color: #F5F5F7;
     background-image: 
       radial-gradient(circle at 20% 20%, rgba(0, 113, 227, 0.08), transparent 25%),
@@ -41,10 +67,111 @@
     background-attachment: fixed;
     background-size: 100% 100%;
   }
+  
+  /* Dark theme background */
+  .dark body {
+    background-color: #111213;
+    background-image: 
+      radial-gradient(circle at 20% 20%, rgba(0, 113, 227, 0.15), transparent 25%),
+      radial-gradient(circle at 80% 80%, rgba(52, 199, 89, 0.15), transparent 25%);
+    background-attachment: fixed;
+    background-size: 100% 100%;
+  }
 }
 
 /* Apple-inspired color variables */
 @layer utilities {
+  /* Light theme colors */
+  .light .text-apple-blue {
+    color: #0071E3;
+  }
+  
+  .light .text-apple-gray {
+    color: #86868B;
+  }
+  
+  .light .bg-apple-blue {
+    background-color: #0071E3;
+  }
+  
+  .light .hover\:bg-blue-600:hover {
+    background-color: #0058B9;
+  }
+  
+  .light .bg-apple-red {
+    background-color: #FF3B30;
+  }
+  
+  .light .text-apple-red {
+    color: #FF3B30;
+  }
+  
+  .light .bg-glass {
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  
+  .light .bg-glass-dark {
+    background-color: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  
+  .light .shadow-apple {
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  }
+  
+  .light .shadow-apple-hover {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Dark theme colors */
+  .dark .text-apple-blue {
+    color: #0A84FF;
+  }
+  
+  .dark .text-apple-gray {
+    color: #98989D;
+  }
+  
+  .dark .bg-apple-blue {
+    background-color: #0A84FF;
+  }
+  
+  .dark .hover\:bg-blue-600:hover {
+    background-color: #007AFF;
+  }
+  
+  .dark .bg-apple-red {
+    background-color: #FF453A;
+  }
+  
+  .dark .text-apple-red {
+    color: #FF453A;
+  }
+  
+  .dark .bg-glass {
+    background-color: rgba(30, 30, 30, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  
+  .dark .bg-glass-dark {
+    background-color: rgba(30, 30, 30, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  
+  .dark .shadow-apple {
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  }
+  
+  .dark .shadow-apple-hover {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  }
+  
+  /* Default colors (for compatibility) */
   .text-apple-blue {
     color: #0071E3;
   }
@@ -79,14 +206,6 @@
     background-color: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-  }
-  
-  .shadow-apple {
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-  }
-  
-  .shadow-apple-hover {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   }
 }
 
