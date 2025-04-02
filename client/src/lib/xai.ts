@@ -50,12 +50,19 @@ export async function analyzeSentiment(text: string): Promise<{
 export async function generateToolSuggestions(toolName: string, toolDescription: string): Promise<string> {
   try {
     // Use server endpoint to generate suggestions
-    const response = await apiRequest<{ suggestions: string }>('/api/xai/suggestions', {
+    const response = await fetch('/api/xai/suggestions', {
       method: 'POST',
-      body: { toolName, toolDescription }
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ toolName, toolDescription })
     });
     
-    return response?.suggestions || "Try exploring the different features of this tool to understand its capabilities.";
+    if (!response.ok) {
+      console.warn(`Server responded with ${response.status}`);
+      return "Try exploring the different features of this tool to understand its capabilities.";
+    }
+    
+    const data = await response.json();
+    return data.suggestions || "Try exploring the different features of this tool to understand its capabilities.";
   } catch (error) {
     console.error("Failed to generate tool suggestions:", error);
     return "Try exploring the different features of this tool to understand its capabilities.";
@@ -66,12 +73,19 @@ export async function generateToolSuggestions(toolName: string, toolDescription:
 export async function autoCategorizeAiTool(description: string): Promise<CategoryType> {
   try {
     // Use server endpoint to categorize
-    const response = await apiRequest<{ category: CategoryType }>('/api/xai/categorize', {
+    const response = await fetch('/api/xai/categorize', {
       method: 'POST',
-      body: { description }
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description })
     });
     
-    return response?.category || "text-generation";
+    if (!response.ok) {
+      console.warn(`Server responded with ${response.status}`);
+      return "text-generation";
+    }
+    
+    const data = await response.json();
+    return data.category || "text-generation";
   } catch (error) {
     console.error("Failed to auto-categorize tool:", error);
     return "text-generation";
@@ -82,12 +96,19 @@ export async function autoCategorizeAiTool(description: string): Promise<Categor
 export async function suggestTags(description: string): Promise<string[]> {
   try {
     // Use server endpoint to suggest tags
-    const response = await apiRequest<{ tags: string[] }>('/api/xai/tags', {
+    const response = await fetch('/api/xai/tags', {
       method: 'POST',
-      body: { description }
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description })
     });
     
-    return response?.tags || ["AI", "Tool"];
+    if (!response.ok) {
+      console.warn(`Server responded with ${response.status}`);
+      return ["AI", "Tool"];
+    }
+    
+    const data = await response.json();
+    return data.tags || ["AI", "Tool"];
   } catch (error) {
     console.error("Failed to suggest tags:", error);
     return ["AI", "Tool"];
