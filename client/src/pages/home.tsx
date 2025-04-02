@@ -176,7 +176,7 @@ export default function Home() {
 
         {/* Dashboard Header with Add Button */}
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-medium text-gray-900">Your AI Tools</h2>
+          <h2 className="text-xl font-medium text-gray-900 dark:text-white">Your AI Tools</h2>
           <button 
             className="px-4 py-2 bg-apple-blue text-white rounded-lg flex items-center hover:bg-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-apple-blue focus:ring-opacity-50"
             onClick={handleOpenAddModal}
