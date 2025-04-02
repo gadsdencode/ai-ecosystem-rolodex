@@ -69,7 +69,7 @@ export function AppHeader({ searchQuery, setSearchQuery }: AppHeaderProps) {
 
   // Search bar animation variants
   const searchBarVariants = {
-    hidden: { opacity: 0, y: -10 },
+    initial: { opacity: 0.9, y: -5 },
     visible: { 
       opacity: 1, 
       y: 0, 
@@ -77,7 +77,7 @@ export function AppHeader({ searchQuery, setSearchQuery }: AppHeaderProps) {
         type: "spring", 
         stiffness: 500, 
         damping: 25,
-        delay: 0.3
+        duration: 0.3
       } 
     },
     active: {
@@ -174,7 +174,7 @@ export function AppHeader({ searchQuery, setSearchQuery }: AppHeaderProps) {
         <motion.div 
           className="relative max-w-md w-full"
           variants={searchBarVariants}
-          initial="hidden"
+          initial="initial"
           animate={isSearchActive ? "active" : "visible"}
         >
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
