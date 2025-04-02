@@ -3,6 +3,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AiTool, AiToolFormData } from '@shared/schema';
 import { apiRequest } from '../lib/queryClient';
 
+// Helper function to ensure tags are always an array
+function ensureTagsArray(tags: string | string[]): string[] {
+  if (Array.isArray(tags)) {
+    return tags;
+  }
+  // If it's a string, split by comma and trim
+  return tags.split(',').map((tag: string) => tag.trim()).filter(Boolean);
+}
+
 export function useAiTools() {
   const queryClient = useQueryClient();
   
@@ -19,9 +28,17 @@ export function useAiTools() {
   const { mutateAsync: addAiTool, isPending: isAdding } = useMutation({
     mutationFn: async (toolData: AiToolFormData) => {
       try {
+        // Ensure tags is always an array before sending
+        const formattedData = {
+          ...toolData,
+          tags: ensureTagsArray(toolData.tags as any) // Use type assertion to avoid TS errors
+        };
+        
+        console.log('Formatted data for API submission:', formattedData);
+        
         return await apiRequest<AiTool>('/api/tools', {
           method: 'POST',
-          body: toolData
+          body: formattedData
         });
       } catch (error) {
         console.error("Error adding AI tool:", error);
@@ -37,9 +54,17 @@ export function useAiTools() {
   const { mutateAsync: updateAiTool, isPending: isUpdating } = useMutation({
     mutationFn: async ({ id, data }: { id: number, data: AiToolFormData }) => {
       try {
+        // Ensure tags is always an array before sending
+        const formattedData = {
+          ...data,
+          tags: ensureTagsArray(data.tags as any) // Use type assertion to avoid TS errors
+        };
+        
+        console.log('Formatted data for API update:', formattedData);
+        
         return await apiRequest<AiTool>(`/api/tools/${id}`, {
           method: 'PUT',
-          body: data
+          body: formattedData
         });
       } catch (error) {
         console.error("Error updating AI tool:", error);
@@ -69,7 +94,7 @@ export function useAiTools() {
   });
   
   return {
-    aiTools,
+    aiTools: aiTools as AiTool[], // Type assertion to fix 'unknown' type
     isLoading,
     error,
     addAiTool: (data: AiToolFormData) => addAiTool(data),

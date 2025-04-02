@@ -1,0 +1,21 @@
+API Request Error (POST /api/tools): 
+Error {}
+
+at t.value (https://23593755-e685-4c46-b774-20db9837d28e-00-1f8ef9x7g5xjb.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://23593755-e685-4c46-b774-20db9837d28e-00-1f8ef9x7g5xjb.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://23593755-e685-4c46-b774-20db9837d28e-00-1f8ef9x7g5xjb.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://23593755-e685-4c46-b774-20db9837d28e-00-1f8ef9x7g5xjb.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+Error adding AI tool: 
+Error {}
+
+at t.value (https://23593755-e685-4c46-b774-20db9837d28e-00-1f8ef9x7g5xjb.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://23593755-e685-4c46-b774-20db9837d28e-00-1f8ef9x7g5xjb.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://23593755-e685-4c46-b774-20db9837d28e-00-1f8ef9x7g5xjb.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://23593755-e685-4c46-b774-20db9837d28e-00-1f8ef9x7g5xjb.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+Form submission error: 
+Error {}
+message: "400: {"message":"Validation error","errors":[{"code":"invalid_type","expected":"string","received":"array","path":["tags"],"message":"Expected string, received array"}]}"
+stack: "Error: 400: {"message":"Validation error","errors":[{"code":"invalid_type","expected":"string","received":"array","path":["tags"],"message":"Expected string, received array"}]}↵ at throwIfResNotOk (https://23593755-e685-4c46-b774-20db9837d28e-00-1f8ef9x7g5xjb.riker.replit.dev/src/lib/queryClient.ts:5:11)↵ at async apiRequest (https://23593755-e685-4c46-b774-20db9837d28e-00-1f8ef9x7g5xjb.riker.replit.dev/src/lib/queryClient.ts:22:5)↵ at async Object.mutationFn (https://23593755-e685-4c46-b774-20db9837d28e-00-1f8ef9x7g5xjb.riker.replit.dev/src/hooks/use-ai-tools.ts:15:16)"
+get stack: ƒ ()
+set stack: ƒ ()
+[[Prototype]]: Object

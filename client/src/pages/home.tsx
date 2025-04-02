@@ -45,7 +45,7 @@ export default function Home() {
   });
 
   // Filter tools by category and search query
-  const filteredTools = aiTools.filter(tool => {
+  const filteredTools = aiTools.filter((tool: AiTool) => {
     // Filter by category
     if (activeCategory !== 'all' && tool.category !== activeCategory) {
       return false;
@@ -57,7 +57,7 @@ export default function Home() {
       return (
         tool.name.toLowerCase().includes(query) ||
         tool.description.toLowerCase().includes(query) ||
-        tool.tags.some(tag => tag.toLowerCase().includes(query)) ||
+        tool.tags.some((tag: string) => tag.toLowerCase().includes(query)) ||
         (tool.notes && tool.notes.toLowerCase().includes(query))
       );
     }
@@ -179,8 +179,8 @@ export default function Home() {
           </div>
         ) : (
           <AiCardGrid 
-            aiTools={aiTools}
-            filteredTools={filteredTools}
+            aiTools={aiTools as AiTool[]}
+            filteredTools={filteredTools as AiTool[]}
             activeCategory={activeCategory}
             searchQuery={searchQuery}
             onEdit={handleOpenEditModal}

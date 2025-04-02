@@ -56,7 +56,11 @@ export const insertAiToolSchema = createInsertSchema(aiTools).omit({
 });
 
 export const aiToolFormSchema = insertAiToolSchema.extend({
-  tags: z.string().transform((val) => val.split(",").map(tag => tag.trim()).filter(Boolean)),
+  // Accept both string and array for tags to support both form input and API submission
+  tags: z.union([
+    z.string().transform((val) => val.split(",").map(tag => tag.trim()).filter(Boolean)),
+    z.array(z.string())
+  ]),
   category: categorySchema,
   iconColor: colorSchema
 });
