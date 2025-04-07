@@ -32,6 +32,12 @@ export async function apiRequest<T = any>(
     });
   
     await throwIfResNotOk(res);
+    
+    // Handle 204 No Content responses (common for successful DELETE operations)
+    if (res.status === 204) {
+      return {} as T;
+    }
+    
     return await res.json();
   } catch (error) {
     console.error(`API Request Error (${method} ${url}):`, error);
