@@ -28,6 +28,7 @@ export const aiTools = pgTable("ai_tools", {
   iconColor: text("icon_color").notNull().default("blue"),
   dateAdded: timestamp("date_added").notNull().defaultNow(),
   dateModified: timestamp("date_modified").notNull().defaultNow(),
+  provider: text("provider").notNull().default("third-party"),
 });
 
 export const categorySchema = z.enum([
@@ -41,6 +42,11 @@ export const categorySchema = z.enum([
   "education",
   "healthcare",
   "other"
+]);
+
+export const providerSchema = z.enum([
+  "kainbridge",
+  "third-party"
 ]);
 
 export const colorSchema = z.enum([
@@ -66,10 +72,12 @@ export const aiToolFormSchema = insertAiToolSchema.extend({
     z.array(z.string())
   ]),
   category: categorySchema,
-  iconColor: colorSchema
+  iconColor: colorSchema,
+  provider: providerSchema,
 });
 
 export type CategoryType = z.infer<typeof categorySchema>;
+export type ProviderType = z.infer<typeof providerSchema>;
 export type ColorType = z.infer<typeof colorSchema>;
 export type AiTool = typeof aiTools.$inferSelect;
 export type InsertAiTool = z.infer<typeof insertAiToolSchema>;

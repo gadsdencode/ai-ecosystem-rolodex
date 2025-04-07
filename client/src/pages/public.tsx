@@ -30,8 +30,16 @@ export default function Public() {
 
   // Filter tools by category and search query
   const filteredTools = aiTools.filter((tool: AiTool) => {
+    // Filter by provider if selected
+    if (activeCategory === 'kainbridge' && tool.provider !== 'kainbridge') {
+      return false;
+    }
+    if (activeCategory === 'third-party' && tool.provider !== 'third-party') {
+      return false;
+    }
+    
     // Filter by category
-    if (activeCategory !== 'all' && tool.category !== activeCategory) {
+    if (activeCategory !== 'all' && activeCategory !== 'kainbridge' && activeCategory !== 'third-party' && tool.category !== activeCategory) {
       return false;
     }
     
@@ -47,6 +55,15 @@ export default function Public() {
     }
     
     return true;
+  })
+  // Sort to prioritize Kainbridge (first-party) apps first
+  .sort((a, b) => {
+    // First sort by provider (kainbridge first)
+    if (a.provider === 'kainbridge' && b.provider !== 'kainbridge') return -1;
+    if (a.provider !== 'kainbridge' && b.provider === 'kainbridge') return 1;
+    
+    // Then sort alphabetically by name
+    return a.name.localeCompare(b.name);
   });
 
   const handleOpenDetailModal = (tool: AiTool) => {
@@ -276,6 +293,17 @@ function PublicAiCard({ tool, onClick }: PublicAiCardProps) {
               {tool.name.charAt(0).toUpperCase()}
             </span>
           </div>
+
+          {/* Provider Badge */}
+          {tool.provider === 'kainbridge' ? (
+            <div className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+              Kainbridge
+            </div>
+          ) : (
+            <div className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
+              Third Party
+            </div>
+          )}
         </div>
         
         <h3 className="mt-3 font-medium text-gray-900 text-lg line-clamp-1">{tool.name}</h3>

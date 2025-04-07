@@ -49,8 +49,16 @@ export default function Admin() {
 
   // Filter tools by category and search query
   const filteredTools = aiTools.filter((tool: AiTool) => {
+    // Filter by provider if selected
+    if (activeCategory === 'kainbridge' && tool.provider !== 'kainbridge') {
+      return false;
+    }
+    if (activeCategory === 'third-party' && tool.provider !== 'third-party') {
+      return false;
+    }
+    
     // Filter by category
-    if (activeCategory !== 'all' && tool.category !== activeCategory) {
+    if (activeCategory !== 'all' && activeCategory !== 'kainbridge' && activeCategory !== 'third-party' && tool.category !== activeCategory) {
       return false;
     }
     
@@ -66,6 +74,15 @@ export default function Admin() {
     }
     
     return true;
+  })
+  // Sort to prioritize Kainbridge (first-party) apps first
+  .sort((a, b) => {
+    // First sort by provider (kainbridge first)
+    if (a.provider === 'kainbridge' && b.provider !== 'kainbridge') return -1;
+    if (a.provider !== 'kainbridge' && b.provider === 'kainbridge') return 1;
+    
+    // Then sort alphabetically by name
+    return a.name.localeCompare(b.name);
   });
 
   // Modal handlers

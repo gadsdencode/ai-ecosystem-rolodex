@@ -56,6 +56,7 @@ export class DatabaseStorage implements IStorage {
       tags: toolData.tags,
       notes: toolData.notes ? toolData.notes : null,
       iconColor: toolData.iconColor,
+      provider: toolData.provider,
       dateAdded: now,
       dateModified: now
     }).returning();
@@ -79,6 +80,7 @@ export class DatabaseStorage implements IStorage {
         tags: toolData.tags,
         notes: toolData.notes ? toolData.notes : null,
         iconColor: toolData.iconColor,
+        provider: toolData.provider,
         dateModified: new Date()
       })
       .where(eq(aiTools.id, id))
@@ -111,7 +113,8 @@ export class DatabaseStorage implements IStorage {
           category: "text-generation",
           tags: ["Conversation", "Writing", "Research"],
           notes: "Great for brainstorming ideas and refining writing. Use with specific prompts for best results.",
-          iconColor: "blue"
+          iconColor: "blue",
+          provider: "third-party"
         },
         {
           name: "DALL-E 3",
@@ -120,7 +123,8 @@ export class DatabaseStorage implements IStorage {
           category: "image-generation",
           tags: ["Art", "Design", "Creative"],
           notes: "Works best with detailed, clear descriptions. Include art style for more targeted results.",
-          iconColor: "purple"
+          iconColor: "purple",
+          provider: "third-party"
         },
         {
           name: "GitHub Copilot",
@@ -129,7 +133,8 @@ export class DatabaseStorage implements IStorage {
           category: "code-assistant",
           tags: ["Programming", "Coding", "Development"],
           notes: "Useful for boilerplate code and routine tasks. Still needs human review to ensure quality.",
-          iconColor: "green"
+          iconColor: "green",
+          provider: "third-party"
         },
         {
           name: "Notion AI",
@@ -138,7 +143,8 @@ export class DatabaseStorage implements IStorage {
           category: "productivity",
           tags: ["Notes", "Writing", "Organization"],
           notes: "Great for summarizing content, drafting emails, and brainstorming ideas within Notion.",
-          iconColor: "orange"
+          iconColor: "orange",
+          provider: "third-party"
         },
         {
           name: "Elicit",
@@ -147,7 +153,8 @@ export class DatabaseStorage implements IStorage {
           category: "research",
           tags: ["Academic", "Literature", "Scientific"],
           notes: "Excellent for literature reviews and understanding papers in unfamiliar fields.",
-          iconColor: "cyan"
+          iconColor: "cyan",
+          provider: "third-party"
         },
         {
           name: "Midjourney",
@@ -156,7 +163,8 @@ export class DatabaseStorage implements IStorage {
           category: "image-generation",
           tags: ["Art", "Design", "Creative"],
           notes: "Particularly good for stylized and artistic images. Use v5 model for best results.",
-          iconColor: "purple"
+          iconColor: "purple",
+          provider: "third-party"
         },
         {
           name: "Grok",
@@ -165,7 +173,8 @@ export class DatabaseStorage implements IStorage {
           category: "text-generation",
           tags: ["Conversation", "Real-time", "Discussion"],
           notes: "More playful and witty than other conversational AI. Good for creative brainstorming.",
-          iconColor: "blue"
+          iconColor: "blue",
+          provider: "third-party"
         }
       ];
       
@@ -184,6 +193,7 @@ export class DatabaseStorage implements IStorage {
           tags: toolData.tags,
           notes: toolData.notes ? toolData.notes : null,
           iconColor: toolData.iconColor,
+          provider: toolData.provider,
           dateAdded: dateAdded,
           dateModified: dateAdded
         });

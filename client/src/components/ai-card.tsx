@@ -79,6 +79,26 @@ export function AiCard({ tool, onEdit, onDelete, onClick }: AiCardProps) {
         <div className={`h-48 bg-gradient-to-br ${from} ${to} flex items-center justify-center`}>
           <CategoryIcon className="w-20 h-20 text-white" />
         </div>
+
+        {/* Provider badge - shown in top left corner */}
+        <div className="absolute top-3 left-3">
+          {tool.provider === 'kainbridge' ? (
+            <motion.div 
+              className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full shadow-sm"
+              whileHover={{ scale: 1.05 }}
+            >
+              Kainbridge
+            </motion.div>
+          ) : (
+            <motion.div 
+              className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full shadow-sm"
+              whileHover={{ scale: 1.05 }}
+            >
+              Third Party
+            </motion.div>
+          )}
+        </div>
+
         <div className="absolute top-3 right-3 flex space-x-2">
           <motion.button 
             className="p-1.5 rounded-full bg-white bg-opacity-80 text-gray-600 hover:bg-opacity-100 transition-all duration-200 backdrop-blur-sm" 

@@ -52,8 +52,20 @@ export function useAiTools() {
   
   // Mutation to update an existing AI tool
   const { mutateAsync: updateAiTool, isPending: isUpdating } = useMutation({
-    mutationFn: async ({ id, data }: { id: number, data: AiToolFormData }) => {
+    mutationFn: async (params: { id: number, data: AiToolFormData } | [number, AiToolFormData]) => {
       try {
+        // Handle different parameter formats (object or array)
+        let id: number;
+        let data: AiToolFormData;
+        
+        if (Array.isArray(params)) {
+          // If called as updateAiTool(id, data)
+          [id, data] = params;
+        } else {
+          // If called as updateAiTool({ id, data })
+          ({ id, data } = params);
+        }
+        
         // Ensure tags is always an array before sending
         const formattedData = {
           ...data,
@@ -98,7 +110,7 @@ export function useAiTools() {
     isLoading,
     error,
     addAiTool: (data: AiToolFormData) => addAiTool(data),
-    updateAiTool: (id: number, data: AiToolFormData) => updateAiTool({ id, data }),
+    updateAiTool: (id: number, data: AiToolFormData) => updateAiTool([id, data]),
     deleteAiTool,
     isAdding,
     isUpdating,

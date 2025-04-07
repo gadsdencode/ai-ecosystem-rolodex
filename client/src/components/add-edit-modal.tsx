@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AiTool, CategoryType, ColorType, aiToolFormSchema } from '@shared/schema';
+import { AiTool, CategoryType, ColorType, ProviderType, aiToolFormSchema } from '@shared/schema';
 import { X, Wand2, Loader2 } from 'lucide-react';
 import { COLOR_GRADIENTS } from '../types';
 import { autoCategorizeAiTool, suggestTags } from '../lib/xai';
@@ -29,6 +29,7 @@ export function AddEditModal({ isOpen, mode, currentTool, onClose, onSubmit }: A
       tags: '',
       notes: '',
       iconColor: 'blue' as ColorType,
+      provider: 'third-party' as ProviderType,
     }
   });
 
@@ -46,6 +47,7 @@ export function AddEditModal({ isOpen, mode, currentTool, onClose, onSubmit }: A
         tags: currentTool.tags.join(', '),
         notes: currentTool.notes || '',
         iconColor: currentTool.iconColor as ColorType,
+        provider: currentTool.provider as ProviderType || 'third-party',
       });
     } else if (mode === 'add') {
       reset({
@@ -56,6 +58,7 @@ export function AddEditModal({ isOpen, mode, currentTool, onClose, onSubmit }: A
         tags: '',
         notes: '',
         iconColor: 'blue' as ColorType,
+        provider: 'third-party' as ProviderType,
       });
     }
   }, [currentTool, mode, isOpen, reset]);
@@ -197,6 +200,22 @@ export function AddEditModal({ isOpen, mode, currentTool, onClose, onSubmit }: A
                   <p className="mt-1 text-xs text-red-500">Description is required</p>
                 ) : (
                   <p className="mt-1 text-xs text-gray-500">Add a detailed description, then click "AI Assist" for smart suggestions</p>
+                )}
+              </div>
+              
+              {/* Provider Selection */}
+              <div>
+                <label htmlFor="provider" className="block text-sm font-medium text-gray-700 mb-1">Provider</label>
+                <select 
+                  id="provider" 
+                  className={`w-full px-3 py-2 border ${errors.provider ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-apple-blue focus:border-apple-blue bg-white`}
+                  {...register("provider")}
+                >
+                  <option value="kainbridge">Kainbridge (1st Party)</option>
+                  <option value="third-party">Third Party</option>
+                </select>
+                {errors.provider && (
+                  <p className="mt-1 text-xs text-red-500">Please select a valid provider</p>
                 )}
               </div>
               
