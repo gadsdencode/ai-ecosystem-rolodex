@@ -12,8 +12,10 @@ export const ALL_CATEGORIES: CategoryFilter[] = [
   { id: "code-assistant", label: "Code Assistant" },
   { id: "productivity", label: "Productivity" },
   { id: "research", label: "Research" },
-  { id: "audio-generation", label: "Audio Generation" },
-  { id: "video-generation", label: "Video Generation" },
+  { id: "professional-development", label: "Professional Development" },
+  { id: "personal-development", label: "Personal Development" },
+  { id: "education", label: "Education" },
+  { id: "healthcare", label: "Healthcare" },
   { id: "other", label: "Other" }
 ];
 
@@ -27,7 +29,9 @@ export const COLOR_GRADIENTS: Record<ColorType, IconGradient> = {
   purple: { from: "from-purple-500", to: "to-pink-600" },
   green: { from: "from-green-500", to: "to-teal-600" },
   orange: { from: "from-orange-500", to: "to-red-600" },
-  cyan: { from: "from-cyan-500", to: "to-blue-600" }
+  cyan: { from: "from-cyan-500", to: "to-blue-600" },
+  pink: { from: "from-pink-500", to: "to-red-600" },
+  gray: { from: "from-gray-500", to: "to-gray-600" }
 };
 
 export const CATEGORY_COLORS: Record<CategoryType, string> = {
@@ -36,7 +40,9 @@ export const CATEGORY_COLORS: Record<CategoryType, string> = {
   "code-assistant": "green",
   "productivity": "orange",
   "research": "cyan",
-  "audio-generation": "blue",
-  "video-generation": "purple",
+  "professional-development": "blue",
+  "personal-development": "purple",
+  "education": "green",
+  "healthcare": "pink",
   "other": "gray"
 };

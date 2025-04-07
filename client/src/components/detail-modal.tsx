@@ -69,8 +69,10 @@ export function DetailModal({ isOpen, tool, onClose, onEdit, onDelete, readOnly 
     "code-assistant": "green",
     "productivity": "orange",
     "research": "cyan",
-    "audio-generation": "blue",
-    "video-generation": "purple",
+    "professional-development": "blue",
+    "personal-development": "purple",
+    "education": "green",
+    "healthcare": "pink",
     "other": "gray"
   }[tool.category] || "blue";
 

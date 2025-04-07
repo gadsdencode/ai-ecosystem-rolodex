@@ -4,10 +4,11 @@ import {
   Image, 
   Code, 
   Briefcase, 
-  BookOpen, 
-  Music, 
-  Film,
-  HelpCircle
+  BookOpen,
+  HelpCircle,
+  BriefcaseMedical,
+  BicepsFlexedIcon,
+  GlassesIcon
 } from 'lucide-react';
 
 export function getCategoryIcon(category: string): React.ComponentType<any> {
@@ -22,10 +23,14 @@ export function getCategoryIcon(category: string): React.ComponentType<any> {
       return Briefcase;
     case 'research':
       return BookOpen;
-    case 'audio-generation':
-      return Music;
-    case 'video-generation':
-      return Film;
+    case 'professional-development':
+      return GlassesIcon;
+    case 'personal-development':
+      return BicepsFlexedIcon;
+    case 'education':
+      return HelpCircle;
+    case 'healthcare':
+      return BriefcaseMedical;;
     default:
       return HelpCircle;
   }

@@ -213,8 +213,10 @@ export function AddEditModal({ isOpen, mode, currentTool, onClose, onSubmit }: A
                   <option value="code-assistant">Code Assistant</option>
                   <option value="productivity">Productivity</option>
                   <option value="research">Research</option>
-                  <option value="audio-generation">Audio Generation</option>
-                  <option value="video-generation">Video Generation</option>
+                  <option value="professional-development">Professional Development</option>
+                  <option value="personal-development">Personal Development</option>
+                  <option value="education">Education</option>
+                  <option value="healthcare">Healthcare</option>
                   <option value="other">Other</option>
                 </select>
                 {errors.category && (

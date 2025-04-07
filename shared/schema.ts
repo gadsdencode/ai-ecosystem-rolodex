@@ -36,8 +36,10 @@ export const categorySchema = z.enum([
   "code-assistant",
   "productivity",
   "research",
-  "audio-generation",
-  "video-generation",
+  "professional-development",
+  "personal-development",
+  "education",
+  "healthcare",
   "other"
 ]);
 
@@ -46,7 +48,9 @@ export const colorSchema = z.enum([
   "purple",
   "green",
   "orange",
-  "cyan"
+  "cyan",
+  "pink",
+  "gray"
 ]);
 
 export const insertAiToolSchema = createInsertSchema(aiTools).omit({
