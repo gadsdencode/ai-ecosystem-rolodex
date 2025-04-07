@@ -154,7 +154,7 @@ export function AddEditModal({ isOpen, mode, currentTool, onClose, onSubmit }: A
                   type="text" 
                   id="name" 
                   placeholder="e.g., ChatGPT" 
-                  className={`w-full px-3 py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-apple-blue focus:border-apple-blue bg-white`}
+                  className={`w-full px-3 py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-apple-blue focus:border-apple-blue bg-white text-gray-900`}
                   {...register("name")}
                 />
                 {errors.name && (
@@ -193,7 +193,7 @@ export function AddEditModal({ isOpen, mode, currentTool, onClose, onSubmit }: A
                   id="description" 
                   placeholder="Brief description of what this AI tool does..."
                   rows={3}
-                  className={`w-full px-3 py-2 border ${errors.description ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-apple-blue focus:border-apple-blue bg-white resize-none`}
+                  className={`w-full px-3 py-2 border ${errors.description ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-apple-blue focus:border-apple-blue bg-white text-gray-900 resize-none`}
                   {...register("description")}
                 ></textarea>
                 {errors.description ? (
@@ -208,7 +208,7 @@ export function AddEditModal({ isOpen, mode, currentTool, onClose, onSubmit }: A
                 <label htmlFor="provider" className="block text-sm font-medium text-gray-700 mb-1">Provider</label>
                 <select 
                   id="provider" 
-                  className={`w-full px-3 py-2 border ${errors.provider ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-apple-blue focus:border-apple-blue bg-white`}
+                  className={`w-full px-3 py-2 border ${errors.provider ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-apple-blue focus:border-apple-blue bg-white text-gray-900`}
                   {...register("provider")}
                 >
                   <option value="kainbridge">Kainbridge (1st Party)</option>
@@ -224,7 +224,7 @@ export function AddEditModal({ isOpen, mode, currentTool, onClose, onSubmit }: A
                 <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                 <select 
                   id="category" 
-                  className={`w-full px-3 py-2 border ${errors.category ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-apple-blue focus:border-apple-blue bg-white`}
+                  className={`w-full px-3 py-2 border ${errors.category ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-apple-blue focus:border-apple-blue bg-white text-gray-900`}
                   {...register("category")}
                 >
                   <option value="text-generation">Text Generation</option>
@@ -250,7 +250,7 @@ export function AddEditModal({ isOpen, mode, currentTool, onClose, onSubmit }: A
                   type="url" 
                   id="url" 
                   placeholder="https://..." 
-                  className={`w-full px-3 py-2 border ${errors.url ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-apple-blue focus:border-apple-blue bg-white`}
+                  className={`w-full px-3 py-2 border ${errors.url ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-apple-blue focus:border-apple-blue bg-white text-gray-900`}
                   {...register("url")}
                 />
                 {errors.url && (
@@ -265,7 +265,7 @@ export function AddEditModal({ isOpen, mode, currentTool, onClose, onSubmit }: A
                   type="text" 
                   id="tags" 
                   placeholder="e.g., writing, research, conversation"
-                  className={`w-full px-3 py-2 border ${errors.tags ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-apple-blue focus:border-apple-blue bg-white`}
+                  className={`w-full px-3 py-2 border ${errors.tags ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-apple-blue focus:border-apple-blue bg-white text-gray-900`}
                   {...register("tags")}
                 />
                 {errors.tags ? (
@@ -282,7 +282,7 @@ export function AddEditModal({ isOpen, mode, currentTool, onClose, onSubmit }: A
                   id="notes" 
                   placeholder="Any personal notes on how you use this tool..."
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-apple-blue focus:border-apple-blue bg-white resize-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-apple-blue focus:border-apple-blue bg-white text-gray-900 resize-none"
                   {...register("notes")}
                 ></textarea>
               </div>
