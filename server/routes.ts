@@ -14,9 +14,20 @@ const xai = new OpenAI({
 });
 
 // Initialize SSOReady client
-const ssoready = new SSOReadyClient({
+const ssoreadyOptions: any = {
   apiKey: process.env.SSOREADY_API_KEY
-}); // Using server-side environment variable
+};
+
+// Uncomment if needed - depends on SSOReady SDK version and what options it accepts
+// If SSOReady API doesn't accept this parameter, leave it commented out
+/* 
+if (process.env.NODE_ENV === 'development') {
+  // Only for development to ensure callbacks work correctly
+  ssoreadyOptions.callbackUrl = 'http://localhost:5000/ssoready-callback';
+}
+*/
+
+const ssoready = new SSOReadyClient(ssoreadyOptions); // Using server-side environment variable
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // XAI API proxy endpoints
@@ -244,15 +255,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // SAML initiation endpoint (proxy for SSOReady)
   app.post('/api/saml/initiate', async (req, res) => {
     try {
-      const { organizationExternalId } = req.body;
+      const { organizationExternalId, email } = req.body;
       
       if (!organizationExternalId) {
         return res.status(400).json({ error: 'Organization external ID is required' });
       }
       
-      const { redirectUrl } = await ssoready.saml.getSamlRedirectUrl({
-        organizationExternalId
-      });
+      // Get the SAML redirect URL, passing the email hint if available
+      const options: any = { organizationExternalId };
+      if (email) {
+        // If email is provided, include it as a login hint
+        options.loginHint = email;
+      }
+      
+      const { redirectUrl } = await ssoready.saml.getSamlRedirectUrl(options);
       
       if (!redirectUrl) {
         return res.status(500).json({ error: 'No redirect URL returned from SSOReady' });
@@ -265,7 +281,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // SSO callback endpoint
+  // SSO callback handling - both server API POST endpoint and client-side GET redirect
+  // API endpoint for POST requests (used by the client code)
   app.post('/api/ssoready-callback', async (req, res) => {
     try {
       const { samlAccessCode } = req.body;
@@ -274,31 +291,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'SAML access code is required' });
       }
       
-      const { email, organizationExternalId } = await ssoready.saml.redeemSamlAccessCode({
-        samlAccessCode
+      console.log('Attempting to redeem SAML access code:', samlAccessCode.substring(0, 10) + '...');
+      
+      try {
+        const result = await ssoready.saml.redeemSamlAccessCode({
+          samlAccessCode
+        });
+        
+        console.log('SSOReady redemption result:', result);
+        
+        if (!result || !result.email || !result.organizationExternalId) {
+          console.error('Invalid SAML response data:', result);
+          return res.status(401).json({ error: 'Invalid SAML response: missing required fields' });
+        }
+        
+        // In a real implementation, you would:
+        // 1. Look up or create a user with this email
+        // 2. Associate them with the organization
+        // 3. Generate a JWT or session token
+        
+        // For this demo, we'll create a simple auth token
+        const authToken = Buffer.from(`${result.email}:${Date.now()}`).toString('base64');
+        
+        // Return user information and token
+        res.json({
+          email: result.email,
+          organizationExternalId: result.organizationExternalId,
+          token: authToken
+        });
+      } catch (samlError: any) {
+        console.error('SSOReady SAML redemption error:', samlError);
+        // More specific error message based on the actual error
+        return res.status(500).json({ 
+          error: 'SAML redemption failed', 
+          details: samlError.message || 'Unknown error from SSOReady'
+        });
+      }
+    } catch (error: any) {
+      console.error('Error processing SSO callback:', error);
+      res.status(500).json({ error: 'Failed to process SSO callback', details: error.message });
+    }
+  });
+
+  // Direct SSO callback from SSOReady (GET request from browser redirect)
+  app.get('/api/ssoready-callback', async (req, res) => {
+    console.log('Received direct SAML callback via GET request');
+    // Log all query parameters
+    console.log('Query parameters:', req.query);
+    
+    // Extract the SAML access code
+    const samlAccessCode = req.query.saml_access_code || req.query.code;
+    
+    if (!samlAccessCode) {
+      console.error('No SAML access code found in query parameters');
+      // Render an error page or redirect to the login page
+      return res.redirect('/login?error=missing_code');
+    }
+    
+    try {
+      // Handle the SAML callback directly on the server
+      const result = await ssoready.saml.redeemSamlAccessCode({
+        samlAccessCode: samlAccessCode.toString()
       });
       
-      if (!email || !organizationExternalId) {
-        return res.status(401).json({ error: 'Invalid SAML response' });
+      console.log('Successfully redeemed SAML code on server:', result);
+      
+      if (!result || !result.email || !result.organizationExternalId) {
+        console.error('Invalid SAML response data:', result);
+        return res.redirect('/login?error=invalid_response');
       }
       
-      // In a real implementation, you would:
-      // 1. Look up or create a user with this email
-      // 2. Associate them with the organization
-      // 3. Generate a JWT or session token
+      // Create auth token
+      const authToken = Buffer.from(`${result.email}:${Date.now()}`).toString('base64');
       
-      // For this demo, we'll create a simple auth token
-      const authToken = Buffer.from(`${email}:${Date.now()}`).toString('base64');
+      // Store authentication data in cookies or query parameters
+      res.cookie('auth_token', authToken, { httpOnly: true });
+      res.cookie('user_email', result.email);
+      res.cookie('organization_id', result.organizationExternalId);
       
-      // Return user information and token
-      res.json({
-        email,
-        organizationExternalId,
-        token: authToken
-      });
+      // Redirect to the admin dashboard
+      return res.redirect('/admin');
+    } catch (error: any) {
+      console.error('Error processing direct SAML callback:', error);
+      return res.redirect(`/login?error=auth_failed&message=${encodeURIComponent(error.message || 'Unknown error')}`);
+    }
+  });
+
+  // Add endpoint to resolve email domains to organization IDs
+  app.post('/api/resolve-domain', async (req, res) => {
+    try {
+      const { email, domain } = req.body;
+      
+      if (!email || !domain) {
+        return res.status(400).json({ error: 'Email and domain are required' });
+      }
+      
+      // In a real implementation, you would look up the domain in your database
+      // For this demo, we'll simply return the configured organization
+      
+      // Here you would typically:
+      // 1. Look up the domain in your database to find matching organizations
+      // 2. If multiple orgs match, use the email to find the specific one
+      // 3. Return the organization ID
+      
+      // For this demo, we'll just return K01
+      const organizationId = 'K01';
+      
+      res.json({ organizationId });
     } catch (error) {
-      console.error('Error processing SSO callback:', error);
-      res.status(500).json({ error: 'Failed to process SSO callback' });
+      console.error('Error resolving domain:', error);
+      res.status(500).json({ error: 'Failed to resolve domain to organization' });
     }
   });
 

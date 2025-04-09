@@ -17,29 +17,61 @@ export default function SSOCallback() {
         const searchString = window.location.search;
         const hashString = window.location.hash;
         
+        console.log('SSO callback URL:', fullUrl);
+        console.log('Search params:', searchString);
+        console.log('Hash fragment:', hashString);
+        
         // Debug information
         setDebugInfo(`Full URL: ${fullUrl}\nSearch params: ${searchString}\nHash: ${hashString}`);
         
         // Extract the code from the URL query parameters
         const searchParams = new URLSearchParams(window.location.search);
         
+        // Get all URL parameters for debugging
+        const allParams: Record<string, string> = {};
+        searchParams.forEach((value, key) => {
+          allParams[key] = value;
+        });
+        console.log('All URL parameters:', allParams);
+        setDebugInfo(prev => `${prev}\n\nAll URL parameters: ${JSON.stringify(allParams, null, 2)}`);
+        
         // Try different possible parameter names
         let samlAccessCode = searchParams.get('code') || 
                              searchParams.get('saml_access_code') || 
-                             searchParams.get('samlAccessCode');
+                             searchParams.get('samlAccessCode') ||
+                             searchParams.get('access_token') ||
+                             searchParams.get('accessToken');
         
         // Also check for code in the hash fragment
         if (!samlAccessCode && window.location.hash) {
           const hashParams = new URLSearchParams(window.location.hash.substring(1));
+          
+          // Get all hash parameters for debugging
+          const allHashParams: Record<string, string> = {};
+          hashParams.forEach((value, key) => {
+            allHashParams[key] = value;
+          });
+          console.log('All hash parameters:', allHashParams);
+          setDebugInfo(prev => `${prev}\n\nAll hash parameters: ${JSON.stringify(allHashParams, null, 2)}`);
+          
           samlAccessCode = hashParams.get('code') || 
                            hashParams.get('saml_access_code') || 
-                           hashParams.get('samlAccessCode');
+                           hashParams.get('samlAccessCode') ||
+                           hashParams.get('access_token') ||
+                           hashParams.get('accessToken');
         }
         
         if (!samlAccessCode) {
+          console.error('No SAML access code found in URL');
           setError('No SAML access code found in the callback URL');
+          
+          // Add more info to debug output
+          setDebugInfo(prev => `${prev}\n\nNo SAML access code found in URL parameters or hash fragment`);
           return;
         }
+        
+        console.log('Found SAML access code:', samlAccessCode.substring(0, 10) + '...');
+        setDebugInfo(prev => `${prev}\n\nFound SAML access code: ${samlAccessCode.substring(0, 10)}...`);
         
         // Handle the SSO callback
         const success = await handleSSOCallback(samlAccessCode);
@@ -49,6 +81,7 @@ export default function SSOCallback() {
           setLocation('/admin');
         } else {
           setError('Failed to authenticate with SSO');
+          setDebugInfo(prev => `${prev}\n\nSSO authentication failed - see console for details`);
         }
       } catch (error) {
         console.error('Error processing SSO callback:', error);
