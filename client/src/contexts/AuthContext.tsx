@@ -31,6 +31,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Check if the user is already authenticated and load remembered organization ID and email
   useEffect(() => {
     const checkAuth = () => {
+      console.log('AuthContext: Checking authentication state');
+      
       // Check for auth token in localStorage (regular login)
       const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
       
@@ -42,12 +44,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return null;
       };
       
+      console.log('AuthContext: Checking for auth cookies');
       const cookieToken = getCookie('auth_token');
       const cookieEmail = getCookie('user_email');
       const cookieOrgId = getCookie('organization_id');
       
+      console.log('AuthContext: Cookie check results:', { cookieToken: !!cookieToken, cookieEmail, cookieOrgId });
+      
       // Check if we have server-side SSO cookies and transfer to localStorage for consistency
       if (cookieToken) {
+        console.log('AuthContext: Found auth cookies, transferring to localStorage');
         localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, cookieToken);
         
         if (cookieEmail) {
@@ -64,12 +70,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         document.cookie = 'auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
         document.cookie = 'user_email=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
         document.cookie = 'organization_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        
+        // Set authenticated immediately to prevent flicker
+        setIsAuthenticated(true);
       }
       
       // Get stored values from localStorage (they may have just been set from cookies)
       const storedToken = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
       const storedOrgId = localStorage.getItem(STORAGE_KEYS.REMEMBERED_ORG_ID);
       const storedEmail = localStorage.getItem(STORAGE_KEYS.REMEMBERED_EMAIL);
+      
+      console.log('AuthContext: Final auth state check:', { 
+        isAuthenticated: !!storedToken,
+        hasRememberedOrgId: !!storedOrgId,
+        hasRememberedEmail: !!storedEmail 
+      });
       
       setIsAuthenticated(!!storedToken);
       setRememberedOrganizationId(storedOrgId);
@@ -78,6 +93,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
     
     checkAuth();
+    
+    // Re-check auth after a delay (helps with SSO redirects)
+    const timerId = setTimeout(checkAuth, 500);
+    return () => clearTimeout(timerId);
   }, []);
 
   const login = async (username: string, password: string): Promise<boolean> => {

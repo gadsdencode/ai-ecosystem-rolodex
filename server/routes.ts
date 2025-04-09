@@ -313,6 +313,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // For this demo, we'll create a simple auth token
         const authToken = Buffer.from(`${result.email}:${Date.now()}`).toString('base64');
         
+        // Store authentication data in cookies that client can access
+        // Make sure cookies are accessible to JavaScript on the client side
+        // Use sameSite=lax to allow cookies to be sent on redirects
+        res.cookie('auth_token', authToken, { 
+          httpOnly: false,  // Allow JavaScript access
+          maxAge: 24 * 60 * 60 * 1000, // 24 hours
+          path: '/',
+          sameSite: 'lax' 
+        });
+        res.cookie('user_email', result.email, { 
+          httpOnly: false, 
+          maxAge: 24 * 60 * 60 * 1000,
+          path: '/',
+          sameSite: 'lax' 
+        });
+        res.cookie('organization_id', result.organizationExternalId, { 
+          httpOnly: false, 
+          maxAge: 24 * 60 * 60 * 1000,
+          path: '/',
+          sameSite: 'lax' 
+        });
+
+        // Also log the cookies being set for debugging
+        console.log('Setting cookies:', {
+          auth_token: authToken.substring(0, 10) + '...',
+          user_email: result.email,
+          organization_id: result.organizationExternalId
+        });
+        
         // Return user information and token
         res.json({
           email: result.email,
@@ -364,10 +393,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create auth token
       const authToken = Buffer.from(`${result.email}:${Date.now()}`).toString('base64');
       
-      // Store authentication data in cookies or query parameters
-      res.cookie('auth_token', authToken, { httpOnly: true });
-      res.cookie('user_email', result.email);
-      res.cookie('organization_id', result.organizationExternalId);
+      // Store authentication data in cookies that client can access
+      // Make sure cookies are accessible to JavaScript on the client side
+      // Use sameSite=lax to allow cookies to be sent on redirects
+      res.cookie('auth_token', authToken, { 
+        httpOnly: false,  // Allow JavaScript access
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        path: '/',
+        sameSite: 'lax' 
+      });
+      res.cookie('user_email', result.email, { 
+        httpOnly: false, 
+        maxAge: 24 * 60 * 60 * 1000,
+        path: '/',
+        sameSite: 'lax' 
+      });
+      res.cookie('organization_id', result.organizationExternalId, { 
+        httpOnly: false, 
+        maxAge: 24 * 60 * 60 * 1000,
+        path: '/',
+        sameSite: 'lax' 
+      });
+
+      // Also log the cookies being set for debugging
+      console.log('Setting cookies:', {
+        auth_token: authToken.substring(0, 10) + '...',
+        user_email: result.email,
+        organization_id: result.organizationExternalId
+      });
       
       // Redirect to the admin dashboard
       return res.redirect('/admin');
