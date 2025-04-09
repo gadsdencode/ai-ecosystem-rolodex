@@ -211,7 +211,7 @@ export function AddEditModal({ isOpen, mode, currentTool, onClose, onSubmit }: A
                   className={`w-full px-3 py-2 border ${errors.provider ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-apple-blue focus:border-apple-blue bg-white text-gray-900`}
                   {...register("provider")}
                 >
-                  <option value="kainbridge">Kainbridge (1st Party)</option>
+                  <option value="overture">Overture (1st Party)</option>
                   <option value="third-party">Third Party</option>
                 </select>
                 {errors.provider && (

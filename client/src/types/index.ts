@@ -1,23 +1,23 @@
 import { AiTool, CategoryType, ColorType, ProviderType } from "@shared/schema";
 
 export interface CategoryFilter {
-  id: CategoryType | "all" | "kainbridge" | "third-party";
+  id: CategoryType | "all" | "overture" | "third-party";
   label: string;
 }
 
 export const ALL_CATEGORIES: CategoryFilter[] = [
   { id: "all", label: "All Tools" },
-  { id: "kainbridge", label: "Kainbridge AI Tools" },
-  { id: "third-party", label: "Third-Party AI Tools" },
-  { id: "text-generation", label: "Text Generation" },
-  { id: "image-generation", label: "Image Generation" },
-  { id: "code-assistant", label: "Code Assistant" },
   { id: "productivity", label: "Productivity" },
   { id: "research", label: "Research" },
   { id: "professional-development", label: "Professional Development" },
   { id: "personal-development", label: "Personal Development" },
   { id: "education", label: "Education" },
   { id: "healthcare", label: "Healthcare" },
+  { id: "text-generation", label: "Text Generation" },
+  { id: "image-generation", label: "Image Generation" },
+  { id: "code-assistant", label: "Code Assistant" },
+  { id: "overture", label: "Overture AI Tools" },
+  { id: "third-party", label: "Third-Party AI Tools" },
   { id: "other", label: "Other" }
 ];
 

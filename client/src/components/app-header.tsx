@@ -204,7 +204,7 @@ export function AppHeader({ searchQuery, setSearchQuery }: AppHeaderProps) {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5, duration: 0.5 }}
           >
-            Kainbridge Ecosystem
+            Overture Ecosystem
           </motion.h2>
             </div>
         </motion.div>

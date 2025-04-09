@@ -82,12 +82,12 @@ export function AiCard({ tool, onEdit, onDelete, onClick }: AiCardProps) {
 
         {/* Provider badge - shown in top left corner */}
         <div className="absolute top-3 left-3">
-          {tool.provider === 'kainbridge' ? (
+          {tool.provider === 'overture' ? (
             <motion.div 
               className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full shadow-sm"
               whileHover={{ scale: 1.05 }}
             >
-              Kainbridge
+              Overture
             </motion.div>
           ) : (
             <motion.div 

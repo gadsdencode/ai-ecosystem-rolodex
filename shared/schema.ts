@@ -45,7 +45,7 @@ export const categorySchema = z.enum([
 ]);
 
 export const providerSchema = z.enum([
-  "kainbridge",
+  "overture",
   "third-party"
 ]);
 
