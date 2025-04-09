@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
 import { aiToolFormSchema } from "@shared/schema";
+import { SSOReadyClient } from 'ssoready';
 
 import OpenAI from "openai";
 
@@ -11,6 +12,11 @@ const xai = new OpenAI({
   baseURL: "https://api.x.ai/v1", 
   apiKey: process.env.XAI_API_KEY 
 });
+
+// Initialize SSOReady client
+const ssoready = new SSOReadyClient({
+  apiKey: process.env.SSOREADY_API_KEY
+}); // Using server-side environment variable
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // XAI API proxy endpoints
@@ -232,6 +238,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error deleting AI tool:', error);
       res.status(500).json({ message: 'Failed to delete AI tool' });
+    }
+  });
+
+  // SAML initiation endpoint (proxy for SSOReady)
+  app.post('/api/saml/initiate', async (req, res) => {
+    try {
+      const { organizationExternalId } = req.body;
+      
+      if (!organizationExternalId) {
+        return res.status(400).json({ error: 'Organization external ID is required' });
+      }
+      
+      const { redirectUrl } = await ssoready.saml.getSamlRedirectUrl({
+        organizationExternalId
+      });
+      
+      if (!redirectUrl) {
+        return res.status(500).json({ error: 'No redirect URL returned from SSOReady' });
+      }
+      
+      res.json({ redirectUrl });
+    } catch (error) {
+      console.error('Error initiating SAML login:', error);
+      res.status(500).json({ error: 'Failed to initiate SAML login' });
+    }
+  });
+
+  // SSO callback endpoint
+  app.post('/api/ssoready-callback', async (req, res) => {
+    try {
+      const { samlAccessCode } = req.body;
+      
+      if (!samlAccessCode) {
+        return res.status(400).json({ error: 'SAML access code is required' });
+      }
+      
+      const { email, organizationExternalId } = await ssoready.saml.redeemSamlAccessCode({
+        samlAccessCode
+      });
+      
+      if (!email || !organizationExternalId) {
+        return res.status(401).json({ error: 'Invalid SAML response' });
+      }
+      
+      // In a real implementation, you would:
+      // 1. Look up or create a user with this email
+      // 2. Associate them with the organization
+      // 3. Generate a JWT or session token
+      
+      // For this demo, we'll create a simple auth token
+      const authToken = Buffer.from(`${email}:${Date.now()}`).toString('base64');
+      
+      // Return user information and token
+      res.json({
+        email,
+        organizationExternalId,
+        token: authToken
+      });
+    } catch (error) {
+      console.error('Error processing SSO callback:', error);
+      res.status(500).json({ error: 'Failed to process SSO callback' });
     }
   });
 
