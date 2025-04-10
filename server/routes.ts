@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { z } from "zod";
 import { aiToolFormSchema } from "@shared/schema";
 import { SSOReadyClient } from 'ssoready';
+import { executeWithRetry } from "./db";
 
 import OpenAI from "openai";
 
@@ -145,18 +146,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // GET all AI tools
-  app.get('/api/tools', async (req, res) => {
+  app.get('/api/tools', async (req, res, next) => {
     try {
       const tools = await storage.getAllAiTools();
       res.json(tools);
     } catch (error) {
-      console.error('Error fetching AI tools:', error);
-      res.status(500).json({ message: 'Failed to fetch AI tools' });
+      next(error); // Pass to error handler to leverage our global error handling
     }
   });
 
   // GET a single AI tool by ID
-  app.get('/api/tools/:id', async (req, res) => {
+  app.get('/api/tools/:id', async (req, res, next) => {
     try {
       const id = parseInt(req.params.id);
       
@@ -172,13 +172,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(tool);
     } catch (error) {
-      console.error('Error fetching AI tool:', error);
-      res.status(500).json({ message: 'Failed to fetch AI tool' });
+      next(error);
     }
   });
 
   // POST - Create a new AI tool
-  app.post('/api/tools', async (req, res) => {
+  app.post('/api/tools', async (req, res, next) => {
     try {
       const validatedData = aiToolFormSchema.parse(req.body);
       
@@ -192,13 +191,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      console.error('Error creating AI tool:', error);
-      res.status(500).json({ message: 'Failed to create AI tool' });
+      next(error);
     }
   });
 
   // PUT - Update an existing AI tool
-  app.put('/api/tools/:id', async (req, res) => {
+  app.put('/api/tools/:id', async (req, res, next) => {
     try {
       const id = parseInt(req.params.id);
       
@@ -224,13 +222,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      console.error('Error updating AI tool:', error);
-      res.status(500).json({ message: 'Failed to update AI tool' });
+      next(error);
     }
   });
 
   // DELETE - Remove an AI tool
-  app.delete('/api/tools/:id', async (req, res) => {
+  app.delete('/api/tools/:id', async (req, res, next) => {
     try {
       const id = parseInt(req.params.id);
       
@@ -247,8 +244,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteAiTool(id);
       res.status(204).send();
     } catch (error) {
-      console.error('Error deleting AI tool:', error);
-      res.status(500).json({ message: 'Failed to delete AI tool' });
+      next(error);
     }
   });
 

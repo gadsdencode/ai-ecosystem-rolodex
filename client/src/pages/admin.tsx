@@ -7,11 +7,11 @@ import { AddEditModal } from '../components/add-edit-modal';
 import { DetailModal } from '../components/detail-modal';
 import { ConfirmDeleteModal } from '../components/confirm-delete-modal';
 import { KeyboardShortcutsModal } from '../components/keyboard-shortcuts-modal';
-import { AiTool, AiToolFormData } from '@shared/schema';
+import { AiTool, AiToolFormData, CategoryType, ProviderType, ColorType, DevelopmentStatusType } from '@shared/schema';
 import { useAiTools } from '../hooks/use-ai-tools';
 import { useKeyboardShortcuts } from '../hooks/use-keyboard-shortcuts';
 import { ALL_CATEGORIES } from '../types';
-import { PlusCircle, LogOut } from 'lucide-react';
+import { PlusCircle, LogOut, Server, Code } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -20,6 +20,7 @@ export default function Admin() {
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
+  const [activeStatus, setActiveStatus] = useState('all');
   
   const [addEditModalOpen, setAddEditModalOpen] = useState(false);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
@@ -47,8 +48,13 @@ export default function Admin() {
     showKeyboardShortcuts: () => setShortcutsModalOpen(true),
   });
 
-  // Filter tools by category and search query
+  // Filter tools by category, development status, and search query
   const filteredTools = aiTools.filter((tool: AiTool) => {
+    // Filter by development status
+    if (activeStatus !== 'all' && tool.developmentStatus !== activeStatus) {
+      return false;
+    }
+    
     // Filter by provider if selected
     if (activeCategory === 'overture' && tool.provider !== 'overture') {
       return false;
@@ -84,6 +90,10 @@ export default function Admin() {
     // Then sort alphabetically by name
     return a.name.localeCompare(b.name);
   });
+
+  // Status counts
+  const productionCount = aiTools.filter(tool => tool.developmentStatus === 'production').length;
+  const developmentCount = aiTools.filter(tool => tool.developmentStatus === 'development').length;
 
   // Modal handlers
   const handleOpenAddModal = () => {
@@ -194,6 +204,30 @@ export default function Admin() {
     }
   }, [error, toast]);
 
+  // Handle changing development status
+  const handleChangeStatus = async (tool: AiTool, newStatus: 'production' | 'development') => {
+    try {
+      await updateAiTool(tool.id, {
+        ...tool,
+        category: tool.category as CategoryType,
+        provider: tool.provider as ProviderType,
+        iconColor: tool.iconColor as ColorType,
+        developmentStatus: newStatus
+      });
+      
+      toast({
+        title: "Status Updated",
+        description: `${tool.name} has been moved to ${newStatus}.`,
+      });
+    } catch (err) {
+      toast({
+        title: "An error occurred",
+        description: "Failed to update tool status. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <>
       <AppHeader searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
@@ -204,6 +238,42 @@ export default function Admin() {
           activeCategory={activeCategory} 
           setActiveCategory={setActiveCategory} 
         />
+
+        {/* Development Status Tabs */}
+        <div className="flex mb-6 border-b border-gray-200">
+          <button
+            className={`px-4 py-2 font-medium text-sm ${
+              activeStatus === 'all' 
+                ? 'text-apple-blue border-b-2 border-apple-blue' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+            onClick={() => setActiveStatus('all')}
+          >
+            All Tools ({aiTools.length})
+          </button>
+          <button
+            className={`px-4 py-2 font-medium text-sm flex items-center ${
+              activeStatus === 'production' 
+                ? 'text-apple-blue border-b-2 border-apple-blue' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+            onClick={() => setActiveStatus('production')}
+          >
+            <Server className="w-4 h-4 mr-1.5" />
+            Production ({productionCount})
+          </button>
+          <button
+            className={`px-4 py-2 font-medium text-sm flex items-center ${
+              activeStatus === 'development' 
+                ? 'text-apple-blue border-b-2 border-apple-blue' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+            onClick={() => setActiveStatus('development')}
+          >
+            <Code className="w-4 h-4 mr-1.5" />
+            In Development ({developmentCount})
+          </button>
+        </div>
 
         {/* Dashboard Header with Add Button and Logout */}
         <div className="flex justify-between items-center mb-6">
@@ -249,6 +319,8 @@ export default function Admin() {
             onDelete={handleOpenDeleteModal}
             onDetails={handleOpenDetailModal}
             onAddNew={handleOpenAddModal}
+            onChangeStatus={handleChangeStatus}
+            showDevelopmentStatus={true}
           />
         )}
       </main>
@@ -268,6 +340,7 @@ export default function Admin() {
         onClose={() => setDetailModalOpen(false)}
         onEdit={() => handleOpenEditModal(currentTool!)}
         onDelete={() => handleOpenDeleteModal(currentTool!)}
+        onChangeStatus={handleChangeStatus}
       />
 
       <ConfirmDeleteModal 

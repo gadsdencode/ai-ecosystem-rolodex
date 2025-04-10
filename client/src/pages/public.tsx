@@ -276,9 +276,16 @@ function PublicAiCard({ tool, onClick }: PublicAiCardProps) {
     exit: { opacity: 0, y: -20, transition: { duration: 0.2 } }
   };
 
+  // Check if the tool is in development
+  const isInDevelopment = tool.developmentStatus === 'development';
+
   return (
     <motion.div
-      className="group relative overflow-hidden rounded-xl border bg-white shadow-md hover:shadow-lg transition-shadow duration-300"
+      className={`group relative overflow-hidden rounded-xl border shadow-md hover:shadow-lg transition-shadow duration-300 ${
+        isInDevelopment 
+          ? 'bg-amber-50 border-amber-200' // Different styling for development apps
+          : 'bg-white border-gray-200'
+      }`}
       variants={cardVariants}
       layoutId={`card-${tool.id}`}
       whileHover={{ y: -5 }}
@@ -295,15 +302,25 @@ function PublicAiCard({ tool, onClick }: PublicAiCardProps) {
           </div>
 
           {/* Provider Badge */}
-          {tool.provider === 'overture' ? (
-            <div className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-lg">
-              Overture
-            </div>
-          ) : (
-            <div className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
-              Third Party
-            </div>
-          )}
+          <div className="flex space-x-1">
+            {tool.provider === 'overture' ? (
+              <div className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-lg">
+                Overture
+              </div>
+            ) : (
+              <div className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
+                Third Party
+              </div>
+            )}
+            
+            {/* Development Status Badge */}
+            {isInDevelopment && (
+              <div className="px-2 py-1 bg-amber-100 text-amber-800 text-xs font-medium rounded-lg flex items-center">
+                <span className="w-2 h-2 bg-amber-500 rounded-full mr-1 animate-pulse"></span>
+                In Development
+              </div>
+            )}
+          </div>
         </div>
         
         <h3 className="mt-3 font-medium text-gray-900 text-lg line-clamp-1">{tool.name}</h3>
@@ -326,6 +343,13 @@ function PublicAiCard({ tool, onClick }: PublicAiCardProps) {
           )}
         </div>
       </div>
+      
+      {/* Development Banner - only for development status */}
+      {isInDevelopment && (
+        <div className="absolute top-2 -right-8 bg-amber-500 text-white px-10 py-0.5 text-xs font-medium transform rotate-45">
+          Beta
+        </div>
+      )}
     </motion.div>
   );
 }

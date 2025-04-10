@@ -3,12 +3,16 @@ import { COLOR_GRADIENTS, CATEGORY_COLORS } from '../types';
 import { getCategoryIcon } from '../lib/icons';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
+import { Server, Code, ChevronUp, ChevronDown } from 'lucide-react';
+import { StatusToggle } from './status-toggle';
 
 interface AiCardProps {
   tool: AiTool;
   onEdit: () => void;
   onDelete: () => void;
   onClick: () => void;
+  onChangeStatus?: (newStatus: 'production' | 'development') => void;
+  showDevelopmentStatus?: boolean;
 }
 
 // Card animation variants
@@ -50,7 +54,14 @@ const cardVariants = {
   }
 };
 
-export function AiCard({ tool, onEdit, onDelete, onClick }: AiCardProps) {
+export function AiCard({ 
+  tool, 
+  onEdit, 
+  onDelete, 
+  onClick, 
+  onChangeStatus,
+  showDevelopmentStatus = false 
+}: AiCardProps) {
   const { from, to } = COLOR_GRADIENTS[tool.iconColor as keyof typeof COLOR_GRADIENTS] || COLOR_GRADIENTS.blue;
   const CategoryIcon = getCategoryIcon(tool.category);
   
@@ -66,7 +77,7 @@ export function AiCard({ tool, onEdit, onDelete, onClick }: AiCardProps) {
 
   return (
     <motion.div 
-      className="card group bg-glass rounded-xl overflow-hidden shadow-apple border border-white border-opacity-40 cursor-pointer"
+      className="card group bg-glass rounded-xl overflow-hidden shadow-apple border border-white border-opacity-40 cursor-pointer relative"
       onClick={handleCardClick}
       variants={cardVariants}
       initial="hidden"
@@ -81,7 +92,7 @@ export function AiCard({ tool, onEdit, onDelete, onClick }: AiCardProps) {
         </div>
 
         {/* Provider badge - shown in top left corner */}
-        <div className="absolute top-3 left-3">
+        <div className="absolute top-3 left-3 flex space-x-2">
           {tool.provider === 'overture' ? (
             <motion.div 
               className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full shadow-sm"
@@ -97,9 +108,62 @@ export function AiCard({ tool, onEdit, onDelete, onClick }: AiCardProps) {
               Third Party
             </motion.div>
           )}
+
+          {/* Development Status Badge */}
+          {showDevelopmentStatus && (
+            <motion.div 
+              className={`px-2 py-1 ${
+                tool.developmentStatus === 'development' 
+                  ? 'bg-orange-100 text-orange-800' 
+                  : 'bg-blue-100 text-blue-800'
+              } text-xs font-medium rounded-full shadow-sm flex items-center`}
+              whileHover={{ scale: 1.05 }}
+            >
+              {tool.developmentStatus === 'development' ? (
+                <>
+                  <Code className="w-3 h-3 mr-1" />
+                  Dev
+                </>
+              ) : (
+                <>
+                  <Server className="w-3 h-3 mr-1" />
+                  Prod
+                </>
+              )}
+            </motion.div>
+          )}
         </div>
 
         <div className="absolute top-3 right-3 flex space-x-2">
+          {/* Development Status Control */}
+          {showDevelopmentStatus && onChangeStatus && (
+            <>
+              {tool.developmentStatus === 'development' ? (
+                <motion.button 
+                  className="p-1.5 rounded-full bg-white bg-opacity-80 text-blue-600 hover:bg-blue-500 hover:text-white transition-all duration-200 backdrop-blur-sm" 
+                  aria-label="Move to Production"
+                  onClick={() => onChangeStatus('production')}
+                  title="Move to Production"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <ChevronUp className="w-4 h-4" />
+                </motion.button>
+              ) : (
+                <motion.button 
+                  className="p-1.5 rounded-full bg-white bg-opacity-80 text-orange-600 hover:bg-orange-500 hover:text-white transition-all duration-200 backdrop-blur-sm" 
+                  aria-label="Move to Development"
+                  onClick={() => onChangeStatus('development')}
+                  title="Move to Development"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <ChevronDown className="w-4 h-4" />
+                </motion.button>
+              )}
+            </>
+          )}
+
           <motion.button 
             className="p-1.5 rounded-full bg-white bg-opacity-80 text-gray-600 hover:bg-opacity-100 transition-all duration-200 backdrop-blur-sm" 
             aria-label="Edit"
@@ -111,6 +175,7 @@ export function AiCard({ tool, onEdit, onDelete, onClick }: AiCardProps) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
             </svg>
           </motion.button>
+          
           <motion.button 
             className="p-1.5 rounded-full bg-white bg-opacity-80 text-gray-600 hover:bg-apple-red hover:text-white transition-all duration-200 backdrop-blur-sm" 
             aria-label="Delete"
@@ -171,6 +236,20 @@ export function AiCard({ tool, onEdit, onDelete, onClick }: AiCardProps) {
           </motion.a>
         </div>
       </div>
+
+      {/* Status Toggle for Admin Users */}
+      {showDevelopmentStatus && onChangeStatus && (
+        <StatusToggle 
+          tool={tool} 
+          onStatusChange={async (tool, newStatus) => {
+            if (onChangeStatus) {
+              onChangeStatus(newStatus);
+            }
+            // Return a resolved promise
+            return Promise.resolve();
+          }} 
+        />
+      )}
     </motion.div>
   );
 }

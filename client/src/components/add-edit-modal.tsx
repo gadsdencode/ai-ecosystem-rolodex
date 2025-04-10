@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AiTool, CategoryType, ColorType, ProviderType, aiToolFormSchema } from '@shared/schema';
+import { AiTool, CategoryType, ColorType, ProviderType, DevelopmentStatusType, aiToolFormSchema } from '@shared/schema';
 import { X, Wand2, Loader2 } from 'lucide-react';
 import { COLOR_GRADIENTS } from '../types';
 import { autoCategorizeAiTool, suggestTags } from '../lib/xai';
@@ -30,6 +30,7 @@ export function AddEditModal({ isOpen, mode, currentTool, onClose, onSubmit }: A
       notes: '',
       iconColor: 'blue' as ColorType,
       provider: 'third-party' as ProviderType,
+      developmentStatus: 'production' as DevelopmentStatusType,
     }
   });
 
@@ -48,6 +49,7 @@ export function AddEditModal({ isOpen, mode, currentTool, onClose, onSubmit }: A
         notes: currentTool.notes || '',
         iconColor: currentTool.iconColor as ColorType,
         provider: currentTool.provider as ProviderType || 'third-party',
+        developmentStatus: currentTool.developmentStatus as DevelopmentStatusType || 'production',
       });
     } else if (mode === 'add') {
       reset({
@@ -59,6 +61,7 @@ export function AddEditModal({ isOpen, mode, currentTool, onClose, onSubmit }: A
         notes: '',
         iconColor: 'blue' as ColorType,
         provider: 'third-party' as ProviderType,
+        developmentStatus: 'production' as DevelopmentStatusType,
       });
     }
   }, [currentTool, mode, isOpen, reset]);
@@ -216,6 +219,22 @@ export function AddEditModal({ isOpen, mode, currentTool, onClose, onSubmit }: A
                 </select>
                 {errors.provider && (
                   <p className="mt-1 text-xs text-red-500">Please select a valid provider</p>
+                )}
+              </div>
+              
+              {/* Development Status */}
+              <div>
+                <label htmlFor="developmentStatus" className="block text-sm font-medium text-gray-700 mb-1">Development Status</label>
+                <select 
+                  id="developmentStatus" 
+                  className={`w-full px-3 py-2 border ${errors.developmentStatus ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-apple-blue focus:border-apple-blue bg-white text-gray-900`}
+                  {...register("developmentStatus")}
+                >
+                  <option value="production">Production</option>
+                  <option value="development">In Development</option>
+                </select>
+                {errors.developmentStatus && (
+                  <p className="mt-1 text-xs text-red-500">Please select a valid development status</p>
                 )}
               </div>
               

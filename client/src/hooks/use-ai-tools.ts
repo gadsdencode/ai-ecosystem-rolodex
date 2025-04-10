@@ -12,17 +12,30 @@ function ensureTagsArray(tags: string | string[]): string[] {
   return tags.split(',').map((tag: string) => tag.trim()).filter(Boolean);
 }
 
+// Max retry attempts for client-side operations
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1 second
+
 export function useAiTools() {
   const queryClient = useQueryClient();
   
-  // Query to fetch all AI tools
+  // Query to fetch all AI tools with retry logic
   const { 
     data: aiTools = [], 
     isLoading, 
-    error 
+    error,
+    refetch 
   } = useQuery({
     queryKey: ['/api/tools'],
+    queryFn: () => apiRequest<AiTool[]>('/api/tools'),
+    retry: MAX_RETRIES,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 30000),
   });
+  
+  // Log any errors for debugging
+  if (error) {
+    console.error('API error:', error);
+  }
   
   // Mutation to add a new AI tool
   const { mutateAsync: addAiTool, isPending: isAdding } = useMutation({
@@ -48,6 +61,8 @@ export function useAiTools() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tools'] });
     },
+    retry: MAX_RETRIES,
+    retryDelay: RETRY_DELAY,
   });
   
   // Mutation to update an existing AI tool
@@ -86,6 +101,8 @@ export function useAiTools() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tools'] });
     },
+    retry: MAX_RETRIES,
+    retryDelay: RETRY_DELAY,
   });
   
   // Mutation to delete an AI tool
@@ -103,12 +120,15 @@ export function useAiTools() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tools'] });
     },
+    retry: MAX_RETRIES,
+    retryDelay: RETRY_DELAY,
   });
   
   return {
     aiTools: aiTools as AiTool[], // Type assertion to fix 'unknown' type
     isLoading,
     error,
+    refetch,
     addAiTool: (data: AiToolFormData) => addAiTool(data),
     updateAiTool: (id: number, data: AiToolFormData) => updateAiTool([id, data]),
     deleteAiTool,

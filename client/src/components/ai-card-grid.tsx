@@ -12,6 +12,8 @@ interface AiCardGridProps {
   onDelete: (tool: AiTool) => void;
   onDetails: (tool: AiTool) => void;
   onAddNew: () => void;
+  onChangeStatus?: (tool: AiTool, newStatus: 'production' | 'development') => void;
+  showDevelopmentStatus?: boolean;
 }
 
 export function AiCardGrid({
@@ -22,7 +24,9 @@ export function AiCardGrid({
   onEdit,
   onDelete,
   onDetails,
-  onAddNew
+  onAddNew,
+  onChangeStatus,
+  showDevelopmentStatus = false
 }: AiCardGridProps) {
   // Show empty state if there are no tools at all, or if filtering returns no results
   const showEmptyState = aiTools.length === 0;
@@ -112,6 +116,10 @@ export function AiCardGrid({
                   onEdit={() => onEdit(tool)} 
                   onDelete={() => onDelete(tool)}
                   onClick={() => onDetails(tool)}
+                  onChangeStatus={onChangeStatus ? 
+                    (newStatus) => onChangeStatus(tool, newStatus) : 
+                    undefined}
+                  showDevelopmentStatus={showDevelopmentStatus}
                 />
               ))}
             </AnimatePresence>
