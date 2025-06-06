@@ -46,7 +46,7 @@ export function CategoryFilters({ categories, activeCategory, setActiveCategory 
   };
 
   return (
-    <div className="mb-8 overflow-x-auto scrollbar-hide">
+    <div className="mb-8 overflow-x-auto">
       <motion.div 
         className="flex space-x-2 pb-1"
         variants={containerVariants}
