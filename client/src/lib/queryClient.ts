@@ -40,14 +40,11 @@ export async function apiRequest<T = unknown>(
   
   const { body, ...restOptions } = options;
   
-  const token = localStorage.getItem('auth_token');
-  
   const requestOptions: RequestInit = { 
     ...restOptions,
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
       ...options.headers,
     },
   };

@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { apiRequest } from '../lib/queryClient';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -13,7 +12,6 @@ interface AuthContextType {
 }
 
 const STORAGE_KEYS = {
-  AUTH_TOKEN: 'auth_token',
   USER_EMAIL: 'user_email',
   ORGANIZATION_ID: 'organization_id',
   REMEMBERED_ORG_ID: 'remembered_org_id',
@@ -39,53 +37,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return null;
       };
       
-      const cookieToken = getCookie('auth_token');
       const cookieEmail = getCookie('user_email');
       const cookieOrgId = getCookie('organization_id');
       
-      if (cookieToken) {
-        localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, cookieToken);
-        
-        if (cookieEmail) {
-          localStorage.setItem(STORAGE_KEYS.USER_EMAIL, cookieEmail);
-          localStorage.setItem(STORAGE_KEYS.REMEMBERED_EMAIL, cookieEmail);
-        }
-        
-        if (cookieOrgId) {
-          localStorage.setItem(STORAGE_KEYS.ORGANIZATION_ID, cookieOrgId);
-          localStorage.setItem(STORAGE_KEYS.REMEMBERED_ORG_ID, cookieOrgId);
-        }
-        
-        document.cookie = 'auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        document.cookie = 'user_email=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        document.cookie = 'organization_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      if (cookieEmail) {
+        localStorage.setItem(STORAGE_KEYS.USER_EMAIL, cookieEmail);
+        localStorage.setItem(STORAGE_KEYS.REMEMBERED_EMAIL, cookieEmail);
       }
       
-      const storedToken = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+      if (cookieOrgId) {
+        localStorage.setItem(STORAGE_KEYS.ORGANIZATION_ID, cookieOrgId);
+        localStorage.setItem(STORAGE_KEYS.REMEMBERED_ORG_ID, cookieOrgId);
+      }
+      
+      try {
+        const response = await fetch('/api/auth/verify', {
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+        }
+      } catch (error) {
+        console.error('Error verifying auth:', error);
+        setIsAuthenticated(false);
+      }
+      
       const storedOrgId = localStorage.getItem(STORAGE_KEYS.REMEMBERED_ORG_ID);
       const storedEmail = localStorage.getItem(STORAGE_KEYS.REMEMBERED_EMAIL);
       
-      if (storedToken) {
-        try {
-          const response = await fetch('/api/auth/verify', {
-            headers: {
-              'Authorization': `Bearer ${storedToken}`
-            }
-          });
-          
-          if (response.ok) {
-            setIsAuthenticated(true);
-          } else {
-            localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-            setIsAuthenticated(false);
-          }
-        } catch (error) {
-          console.error('Error verifying token:', error);
-          setIsAuthenticated(false);
-        }
-      } else {
-        setIsAuthenticated(false);
-      }
+      console.log('AuthContext: Final auth state check:', { 
+        isAuthenticated,
+        hasRememberedOrgId: !!storedOrgId,
+        hasRememberedEmail: !!storedEmail 
+      });
       
       setRememberedOrganizationId(storedOrgId);
       setRememberedEmail(storedEmail);
@@ -112,9 +99,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return false;
       }
       
-      const data = await response.json();
-      
-      localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, data.token);
       setIsAuthenticated(true);
       return true;
     } catch (error) {
@@ -167,6 +151,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ samlAccessCode }),
+        credentials: 'include'
       });
 
       const data = await response.json();
@@ -178,7 +163,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       console.log('SSO callback successful response:', data);
       
-      localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, data.token);
       localStorage.setItem(STORAGE_KEYS.USER_EMAIL, data.email);
       localStorage.setItem(STORAGE_KEYS.ORGANIZATION_ID, data.organizationExternalId);
       
@@ -210,7 +194,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Logout error:', error);
     }
     
-    localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
     localStorage.removeItem(STORAGE_KEYS.USER_EMAIL);
     localStorage.removeItem(STORAGE_KEYS.ORGANIZATION_ID);
     

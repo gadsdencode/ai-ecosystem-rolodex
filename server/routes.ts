@@ -24,13 +24,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.cookie('auth_token', result.token, { 
-        httpOnly: false,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
         maxAge: 24 * 60 * 60 * 1000,
         path: '/',
         sameSite: 'lax' 
       });
       
-      res.json({ token: result.token });
+      res.json({ success: true });
     } catch (error) {
       console.error('Login error:', error);
       res.status(500).json({ message: 'An error occurred during login' });
@@ -64,7 +65,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/auth/logout', (req, res) => {
     res.cookie('auth_token', '', { 
-      httpOnly: false,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
       maxAge: 0,
       path: '/',
       sameSite: 'lax' 
@@ -253,7 +255,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await ssoService.redeemSAMLAccessCode(samlAccessCode);
       
       res.cookie('auth_token', result.token, { 
-        httpOnly: false,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
         maxAge: 24 * 60 * 60 * 1000,
         path: '/',
         sameSite: 'lax' 
@@ -279,8 +282,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({
         email: result.email,
-        organizationExternalId: result.organizationExternalId,
-        token: result.token
+        organizationExternalId: result.organizationExternalId
       });
     } catch (error: any) {
       console.error('Error processing SSO callback:', error);
@@ -305,7 +307,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Successfully redeemed SAML code on server');
       
       res.cookie('auth_token', result.token, { 
-        httpOnly: false,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
         maxAge: 24 * 60 * 60 * 1000,
         path: '/',
         sameSite: 'lax' 
