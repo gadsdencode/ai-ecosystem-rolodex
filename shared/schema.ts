@@ -16,7 +16,6 @@ export const insertUserSchema = createInsertSchema(users).pick({
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
-// AI Tool Model
 export const aiTools = pgTable("ai_tools", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
@@ -72,11 +71,7 @@ export const insertAiToolSchema = createInsertSchema(aiTools).omit({
 });
 
 export const aiToolFormSchema = insertAiToolSchema.extend({
-  // Accept both string and array for tags to support both form input and API submission
-  tags: z.union([
-    z.string().transform((val) => val.split(",").map(tag => tag.trim()).filter(Boolean)),
-    z.array(z.string())
-  ]),
+  tags: z.array(z.string()),
   category: categorySchema,
   iconColor: colorSchema,
   provider: providerSchema,

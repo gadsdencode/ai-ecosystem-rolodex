@@ -1,25 +1,20 @@
-import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AiTool, AiToolFormData } from '@shared/schema';
 import { apiRequest } from '../lib/queryClient';
 
-// Helper function to ensure tags are always an array
 function ensureTagsArray(tags: string | string[]): string[] {
   if (Array.isArray(tags)) {
     return tags;
   }
-  // If it's a string, split by comma and trim
   return tags.split(',').map((tag: string) => tag.trim()).filter(Boolean);
 }
 
-// Max retry attempts for client-side operations
 const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000; // 1 second
+const RETRY_DELAY = 1000;
 
 export function useAiTools() {
   const queryClient = useQueryClient();
   
-  // Query to fetch all AI tools with retry logic
   const { 
     data: aiTools = [], 
     isLoading, 
@@ -32,31 +27,23 @@ export function useAiTools() {
     retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 30000),
   });
   
-  // Log any errors for debugging
   if (error) {
     console.error('API error:', error);
   }
   
-  // Mutation to add a new AI tool
   const { mutateAsync: addAiTool, isPending: isAdding } = useMutation({
     mutationFn: async (toolData: AiToolFormData) => {
-      try {
-        // Ensure tags is always an array before sending
-        const formattedData = {
-          ...toolData,
-          tags: ensureTagsArray(toolData.tags as any) // Use type assertion to avoid TS errors
-        };
-        
-        console.log('Formatted data for API submission:', formattedData);
-        
-        return await apiRequest<AiTool>('/api/tools', {
-          method: 'POST',
-          body: formattedData
-        });
-      } catch (error) {
-        console.error("Error adding AI tool:", error);
-        throw error;
-      }
+      const formattedData = {
+        ...toolData,
+        tags: ensureTagsArray(toolData.tags as string | string[])
+      };
+      
+      console.log('Formatted data for API submission:', formattedData);
+      
+      return await apiRequest<AiTool>('/api/tools', {
+        method: 'POST',
+        body: formattedData
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tools'] });
@@ -65,38 +52,28 @@ export function useAiTools() {
     retryDelay: RETRY_DELAY,
   });
   
-  // Mutation to update an existing AI tool
   const { mutateAsync: updateAiTool, isPending: isUpdating } = useMutation({
     mutationFn: async (params: { id: number, data: AiToolFormData } | [number, AiToolFormData]) => {
-      try {
-        // Handle different parameter formats (object or array)
-        let id: number;
-        let data: AiToolFormData;
-        
-        if (Array.isArray(params)) {
-          // If called as updateAiTool(id, data)
-          [id, data] = params;
-        } else {
-          // If called as updateAiTool({ id, data })
-          ({ id, data } = params);
-        }
-        
-        // Ensure tags is always an array before sending
-        const formattedData = {
-          ...data,
-          tags: ensureTagsArray(data.tags as any) // Use type assertion to avoid TS errors
-        };
-        
-        console.log('Formatted data for API update:', formattedData);
-        
-        return await apiRequest<AiTool>(`/api/tools/${id}`, {
-          method: 'PUT',
-          body: formattedData
-        });
-      } catch (error) {
-        console.error("Error updating AI tool:", error);
-        throw error;
+      let id: number;
+      let data: AiToolFormData;
+      
+      if (Array.isArray(params)) {
+        [id, data] = params;
+      } else {
+        ({ id, data } = params);
       }
+      
+      const formattedData = {
+        ...data,
+        tags: ensureTagsArray(data.tags as string | string[])
+      };
+      
+      console.log('Formatted data for API update:', formattedData);
+      
+      return await apiRequest<AiTool>(`/api/tools/${id}`, {
+        method: 'PUT',
+        body: formattedData
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tools'] });
@@ -105,35 +82,78 @@ export function useAiTools() {
     retryDelay: RETRY_DELAY,
   });
   
-  // Mutation to delete an AI tool
   const { mutateAsync: deleteAiTool, isPending: isDeleting } = useMutation({
     mutationFn: async (id: number) => {
-      try {
-        await apiRequest(`/api/tools/${id}`, {
-          method: 'DELETE'
-        });
-      } catch (error) {
-        console.error("Error deleting AI tool:", error);
-        throw error;
-      }
+      await apiRequest(`/api/tools/${id}`, {
+        method: 'DELETE'
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tools'] });
     },
     retry: MAX_RETRIES,
     retryDelay: RETRY_DELAY,
+  });
+
+  const { mutateAsync: updateToolStatus, isPending: isUpdatingStatus } = useMutation({
+    mutationFn: async ({ id, status }: { id: number; status: 'production' | 'development' }) => {
+      const tool = aiTools.find(t => t.id === id);
+      if (!tool) throw new Error('Tool not found');
+      
+      const formattedData = {
+        name: tool.name,
+        description: tool.description,
+        url: tool.url,
+        category: tool.category,
+        tags: tool.tags,
+        notes: tool.notes || '',
+        iconColor: tool.iconColor,
+        provider: tool.provider,
+        developmentStatus: status
+      };
+      
+      return await apiRequest<AiTool>(`/api/tools/${id}`, {
+        method: 'PUT',
+        body: formattedData
+      });
+    },
+    onMutate: async ({ id, status }) => {
+      await queryClient.cancelQueries({ queryKey: ['/api/tools'] });
+      
+      const previousTools = queryClient.getQueryData<AiTool[]>(['/api/tools']);
+      
+      queryClient.setQueryData<AiTool[]>(['/api/tools'], (old) => 
+        old?.map(tool => 
+          tool.id === id 
+            ? { ...tool, developmentStatus: status }
+            : tool
+        ) || []
+      );
+      
+      return { previousTools };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousTools) {
+        queryClient.setQueryData(['/api/tools'], context.previousTools);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/tools'] });
+    },
   });
   
   return {
-    aiTools: aiTools as AiTool[], // Type assertion to fix 'unknown' type
+    aiTools: aiTools as AiTool[],
     isLoading,
     error,
     refetch,
     addAiTool: (data: AiToolFormData) => addAiTool(data),
     updateAiTool: (id: number, data: AiToolFormData) => updateAiTool([id, data]),
     deleteAiTool,
+    updateToolStatus,
     isAdding,
     isUpdating,
     isDeleting,
+    isUpdatingStatus,
   };
 }

@@ -28,30 +28,32 @@ export const queryClient = new QueryClient({
  * @param options Fetch options
  * @returns Parsed JSON response
  */
-export async function apiRequest<T = any>(
+interface ApiRequestOptions extends Omit<RequestInit, 'body'> {
+  body?: unknown;
+}
+
+export async function apiRequest<T = unknown>(
   url: string,
-  options: RequestInit & { body?: any } = {}
+  options: ApiRequestOptions = {}
 ): Promise<T> {
-  // Ensure URL starts with /api/
   const apiUrl = url.startsWith('/api/') ? url : `/api/${url}`;
   
-  // Process options before sending
+  const { body, ...restOptions } = options;
+  
+  const token = localStorage.getItem('auth_token');
+  
   const requestOptions: RequestInit = { 
-    ...options,
-    credentials: 'include' // Always include credentials
+    ...restOptions,
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      ...options.headers,
+    },
   };
   
-  // Default headers
-  requestOptions.headers = {
-    'Content-Type': 'application/json',
-    ...options.headers,
-  };
-  
-  // Handle request body - stringify if it's an object
-  if (options.body && typeof options.body === 'object') {
-    requestOptions.body = JSON.stringify(options.body);
-  } else if (options.body) {
-    requestOptions.body = options.body;
+  if (body !== undefined) {
+    requestOptions.body = typeof body === 'object' ? JSON.stringify(body) : String(body);
   }
   
   try {

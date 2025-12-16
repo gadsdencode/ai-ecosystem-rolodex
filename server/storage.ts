@@ -1,6 +1,7 @@
 import { users, type User, type InsertUser, aiTools, AiTool, AiToolFormData } from "@shared/schema";
 import { db, executeWithRetry } from "./db";
 import { eq } from "drizzle-orm";
+import bcrypt from 'bcrypt';
 
 // Interface for all storage operations
 export interface IStorage {
@@ -117,12 +118,21 @@ export class DatabaseStorage implements IStorage {
     });
   }
   
-  // Seed initial data if needed (will be moved to a separate migration script)
   async seedInitialData(): Promise<void> {
     return executeWithRetry(async () => {
+      const existingAdmin = await db.select().from(users).where(eq(users.username, 'admin'));
+      
+      if (existingAdmin.length === 0) {
+        const hashedPassword = await bcrypt.hash('admin123', 10);
+        await db.insert(users).values({
+          username: 'admin',
+          password: hashedPassword
+        });
+        console.log('Admin user created with username: admin, password: admin123');
+      }
+      
       const count = await db.select().from(aiTools);
       
-      // Only seed if no data exists
       if (count.length === 0) {
         const seedTools = [
           {
