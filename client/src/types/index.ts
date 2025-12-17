@@ -24,27 +24,58 @@ export const ALL_CATEGORIES: CategoryFilter[] = [
 export interface IconGradient {
   from: string;
   to: string;
+  accent?: string; // Optional accent color for category badges
 }
 
+// Updated Overture Systems brand color gradients
 export const COLOR_GRADIENTS: Record<ColorType, IconGradient> = {
-  blue: { from: "from-blue-500", to: "to-indigo-600" },
-  purple: { from: "from-purple-500", to: "to-pink-600" },
-  green: { from: "from-green-500", to: "to-teal-600" },
-  orange: { from: "from-orange-500", to: "to-red-600" },
-  cyan: { from: "from-cyan-500", to: "to-blue-600" },
-  pink: { from: "from-pink-500", to: "to-red-600" },
-  gray: { from: "from-gray-500", to: "to-gray-600" }
+  blue: { 
+    from: "from-primary-500", 
+    to: "to-primary-700",
+    accent: "primary"
+  },
+  purple: { 
+    from: "from-secondary-500", 
+    to: "to-secondary-700",
+    accent: "secondary"
+  },
+  green: { 
+    from: "from-emerald-500", 
+    to: "to-teal-600",
+    accent: "emerald"
+  },
+  orange: { 
+    from: "from-amber-500", 
+    to: "to-orange-600",
+    accent: "amber"
+  },
+  cyan: { 
+    from: "from-cyan-500", 
+    to: "to-primary-600",
+    accent: "cyan"
+  },
+  pink: { 
+    from: "from-accent-500", 
+    to: "to-pink-600",
+    accent: "accent"
+  },
+  gray: { 
+    from: "from-slate-500", 
+    to: "to-slate-700",
+    accent: "slate"
+  }
 };
 
+// Category badge colors mapped to brand palette
 export const CATEGORY_COLORS: Record<CategoryType, string> = {
-  "text-generation": "blue",
-  "image-generation": "purple",
-  "code-assistant": "green",
-  "productivity": "orange",
-  "research": "cyan",
-  "professional-development": "blue",
-  "personal-development": "purple",
-  "education": "green",
-  "healthcare": "pink",
-  "other": "gray"
+  "text-generation": "primary",      // Indigo
+  "image-generation": "secondary",   // Purple
+  "code-assistant": "emerald",       // Green
+  "productivity": "amber",           // Orange
+  "research": "cyan",                // Cyan
+  "professional-development": "primary",
+  "personal-development": "secondary",
+  "education": "emerald",
+  "healthcare": "accent",            // Rose
+  "other": "slate"
 };

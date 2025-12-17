@@ -33,56 +33,56 @@ export function StatusToggle({ tool, onStatusChange }: StatusToggleProps) {
       onMouseLeave={() => setIsHovered(false)}
     >
       {isUpdating ? (
-        <div className="p-2 bg-white bg-opacity-90 rounded-lg shadow-md flex items-center justify-center">
-          <Loader2 className="w-4 h-4 text-gray-600 animate-spin" />
+        <div className="p-2 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-lg shadow-md flex items-center justify-center">
+          <Loader2 className="w-4 h-4 text-primary-500 animate-spin" />
         </div>
       ) : isHovered ? (
         <motion.div 
-          className="bg-white bg-opacity-90 rounded-lg shadow-md p-1 flex"
+          className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm rounded-lg shadow-brand p-1.5 flex"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
         >
           {tool.developmentStatus === 'development' ? (
             <motion.button
-              className="flex items-center space-x-1 px-2 py-1 text-xs text-blue-700 hover:bg-blue-50 rounded"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-md transition-colors"
               onClick={() => handleStatusChange('production')}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               title="Move to Production"
             >
-              <ChevronUp className="w-3 h-3" />
-              <span>To Production</span>
+              <ChevronUp className="w-3.5 h-3.5" />
+              <span className="font-mono tracking-tight">PROD</span>
             </motion.button>
           ) : (
             <motion.button
-              className="flex items-center space-x-1 px-2 py-1 text-xs text-orange-700 hover:bg-orange-50 rounded"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 rounded-md transition-colors"
               onClick={() => handleStatusChange('development')}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               title="Move to Development"
             >
-              <ChevronDown className="w-3 h-3" />
-              <span>To Development</span>
+              <ChevronDown className="w-3.5 h-3.5" />
+              <span className="font-mono tracking-tight">DEV</span>
             </motion.button>
           )}
         </motion.div>
       ) : (
         <motion.div 
-          className={`p-1.5 rounded-full ${
+          className={`p-2 rounded-lg shadow-md backdrop-blur-sm transition-all ${
             tool.developmentStatus === 'development' 
-              ? 'bg-orange-100 text-orange-800' 
-              : 'bg-blue-100 text-blue-800'
-          } opacity-70 hover:opacity-100 transition-opacity`}
+              ? 'bg-gradient-to-br from-amber-500/20 to-orange-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30' 
+              : 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30'
+          } opacity-70 hover:opacity-100`}
           whileHover={{ scale: 1.1 }}
         >
           {tool.developmentStatus === 'development' ? (
-            <Code className="w-3.5 h-3.5" />
+            <Code className="w-4 h-4" />
           ) : (
-            <Server className="w-3.5 h-3.5" />
+            <Server className="w-4 h-4" />
           )}
         </motion.div>
       )}
     </div>
   );
-} 
+}

@@ -6,11 +6,14 @@ import { DetailModal } from '../components/detail-modal';
 import { KeyboardShortcutsModal } from '../components/keyboard-shortcuts-modal';
 import { AiTool } from '@shared/schema';
 import { useAiTools } from '../hooks/use-ai-tools';
-import { ALL_CATEGORIES } from '../types';
-import { UserCircle } from 'lucide-react';
+import { ALL_CATEGORIES, COLOR_GRADIENTS } from '../types';
+import { UserCircle, ExternalLink, Code, Server } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { EmptyState } from '@/components/empty-state';
+import { useTheme } from '../contexts/ThemeContext';
+import { getCategoryIcon } from '../lib/icons';
+import { Button } from '@/components/ui/button';
 
 export default function Public() {
   const { toast } = useToast();
@@ -110,12 +113,12 @@ export default function Public() {
 
         {/* Header with Login Link */}
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-medium text-gray-900 dark:text-gray-400">AI Tool Directory</h2>
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">AI Tool Directory</h2>
           <Link href="/login">
-            <button className="px-4 py-2 text-apple-blue border border-apple-blue rounded-lg flex items-center hover:bg-blue-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-apple-blue focus:ring-opacity-50">
-              <UserCircle className="w-5 h-5 mr-1.5" />
+            <Button variant="brand-outline" size="default" className="flex items-center gap-1.5">
+              <UserCircle className="w-5 h-5" />
               Admin Login
-            </button>
+            </Button>
           </Link>
         </div>
 
@@ -223,12 +226,12 @@ function PublicAiCardGrid({
             variants={emptyStateVariants}
           >
             <motion.div className="text-center">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No tools found</h3>
-              <p className="text-gray-500 mb-6">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">No tools found</h3>
+              <p className="text-slate-600 dark:text-slate-400 mb-6">
                 No AI tools match your current filters. Try adjusting your search or category selection.
               </p>
               <motion.button 
-                className="px-5 py-2.5 bg-apple-blue text-white rounded-lg flex items-center mx-auto hover:bg-blue-600 transition-colors duration-200"
+                className="px-5 py-2.5 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-lg flex items-center mx-auto hover:shadow-brand-lg transition-all duration-200"
                 onClick={() => window.dispatchEvent(new CustomEvent('setCategory', { detail: 'all' }))}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -269,87 +272,169 @@ interface PublicAiCardProps {
 }
 
 function PublicAiCard({ tool, onClick }: PublicAiCardProps) {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  
   // Animation variants for card
   const cardVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+    hidden: { opacity: 0, y: 20, scale: 0.95 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1,
+      transition: { 
+        type: "spring",
+        stiffness: 260,
+        damping: 20
+      } 
+    },
     exit: { opacity: 0, y: -20, transition: { duration: 0.2 } }
   };
 
   // Check if the tool is in development
   const isInDevelopment = tool.developmentStatus === 'development';
+  
+  // Get gradient colors for the header
+  const { from, to } = COLOR_GRADIENTS[tool.iconColor as keyof typeof COLOR_GRADIENTS] || COLOR_GRADIENTS.blue;
+  const CategoryIcon = getCategoryIcon(tool.category);
 
   return (
     <motion.div
-      className={`group relative overflow-hidden rounded-xl border shadow-md hover:shadow-lg transition-shadow duration-300 ${
-        isInDevelopment 
-          ? 'bg-amber-50 border-amber-200' // Different styling for development apps
-          : 'bg-white border-gray-200'
+      className={`group relative overflow-hidden rounded-xl backdrop-blur-lg cursor-pointer transition-all duration-300 ${
+        isDark
+          ? 'bg-slate-900/80 border border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_30px_rgba(99,102,241,0.15)]'
+          : 'bg-white/80 border border-white/50 shadow-lg hover:shadow-brand-lg'
       }`}
       variants={cardVariants}
       layoutId={`card-${tool.id}`}
-      whileHover={{ y: -5 }}
+      whileHover={{ y: -8, scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
       onClick={onClick}
     >
-      <div className="p-5 cursor-pointer">
-        <div className="flex justify-between">
-          <div 
-            className={`w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-tr from-${tool.iconColor}-500 to-${tool.iconColor}-400`}
-          >
-            <span className="text-white text-xl font-bold">
-              {tool.name.charAt(0).toUpperCase()}
-            </span>
-          </div>
-
-          {/* Provider Badge */}
-          <div className="flex space-x-1">
-            {tool.provider === 'overture' ? (
-              <div className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-lg">
-                Overture
-              </div>
-            ) : (
-              <div className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
-                Third Party
-              </div>
-            )}
-            
-            {/* Development Status Badge */}
-            {isInDevelopment && (
-              <div className="px-2 py-1 bg-amber-100 text-amber-800 text-xs font-medium rounded-lg flex items-center">
-                <span className="w-2 h-2 bg-amber-500 rounded-full mr-1 animate-pulse"></span>
-                In Development
-              </div>
-            )}
-          </div>
+      {/* Gradient header with category icon */}
+      <div className="relative">
+        <div className={`h-36 bg-gradient-to-br ${from} ${to} flex items-center justify-center relative overflow-hidden`}>
+          {/* Subtle pattern overlay */}
+          <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.8),transparent_70%)]" />
+          
+          <CategoryIcon className="w-16 h-16 text-white drop-shadow-lg relative z-10" />
+          
+          {/* Glow effect on hover */}
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-30 transition-opacity duration-300 bg-gradient-to-t from-transparent via-white/20 to-transparent" />
         </div>
+
+        {/* Provider & Status badges - top left */}
+        <div className="absolute top-3 left-3 flex flex-wrap gap-2">
+          {tool.provider === 'overture' ? (
+            <motion.div 
+              className="px-2.5 py-1 bg-gradient-to-r from-primary-500/90 to-secondary-500/90 text-white text-xs font-semibold rounded-full shadow-md backdrop-blur-sm"
+              whileHover={{ scale: 1.05 }}
+            >
+              <span className="font-mono tracking-tight">OVERTURE</span>
+            </motion.div>
+          ) : (
+            <motion.div 
+              className={`px-2.5 py-1 text-xs font-medium rounded-full shadow-md backdrop-blur-sm border ${
+                isDark
+                  ? 'bg-slate-800/90 text-slate-300 border-white/10'
+                  : 'bg-white/90 text-slate-600 border-white/20'
+              }`}
+              whileHover={{ scale: 1.05 }}
+            >
+              Third Party
+            </motion.div>
+          )}
+
+          {/* Development Status Badge */}
+          {isInDevelopment && (
+            <motion.div 
+              className="px-2.5 py-1 text-xs font-semibold rounded-full shadow-md backdrop-blur-sm flex items-center gap-1 bg-gradient-to-r from-amber-500/90 to-orange-500/90 text-white"
+              whileHover={{ scale: 1.05 }}
+            >
+              <Code className="w-3 h-3" />
+              <span className="font-mono">DEV</span>
+            </motion.div>
+          )}
+        </div>
+      </div>
+      
+      {/* Card content */}
+      <div className="p-5">
+        <h3 className={`font-semibold text-lg line-clamp-1 mb-2 ${
+          isDark ? 'text-white' : 'text-slate-900'
+        }`}>
+          {tool.name}
+        </h3>
         
-        <h3 className="mt-3 font-medium text-gray-900 text-lg line-clamp-1">{tool.name}</h3>
+        <p className={`text-sm line-clamp-2 mb-4 ${
+          isDark ? 'text-slate-400' : 'text-slate-600'
+        }`}>
+          {tool.description}
+        </p>
         
-        <p className="mt-2 text-gray-600 text-sm line-clamp-3">{tool.description}</p>
-        
-        <div className="mt-3 flex flex-wrap gap-1.5">
+        {/* Tags */}
+        <div className="flex flex-wrap gap-1.5 mb-4">
           {tool.tags.slice(0, 3).map((tag: string, index: number) => (
-            <span 
+            <motion.span 
               key={index} 
-              className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full"
+              className={`px-2.5 py-1 text-xs font-medium rounded-full border ${
+                isDark
+                  ? 'bg-slate-800/50 text-slate-400 border-slate-700/50'
+                  : 'bg-slate-100/80 text-slate-600 border-slate-200/50'
+              }`}
+              whileHover={{ scale: 1.05 }}
             >
               {tag}
-            </span>
+            </motion.span>
           ))}
           {tool.tags.length > 3 && (
-            <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full">
+            <motion.span 
+              className={`px-2.5 py-1 text-xs font-medium rounded-full border ${
+                isDark
+                  ? 'bg-slate-800/50 text-slate-400 border-slate-700/50'
+                  : 'bg-slate-100/80 text-slate-600 border-slate-200/50'
+              }`}
+              whileHover={{ scale: 1.05 }}
+            >
               +{tool.tags.length - 3}
-            </span>
+            </motion.span>
           )}
+        </div>
+
+        {/* Footer link */}
+        <div className={`pt-3 border-t flex justify-end items-center ${
+          isDark ? 'border-slate-700/50' : 'border-slate-200/50'
+        }`}>
+          <motion.a 
+            href={tool.url} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className={`inline-flex items-center gap-1.5 text-sm font-medium transition-colors ${
+              isDark
+                ? 'text-primary-400 hover:text-primary-300'
+                : 'text-primary-500 hover:text-primary-600'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+            whileHover={{ scale: 1.05, x: 2 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Open Tool
+            <ExternalLink className="w-3.5 h-3.5" />
+          </motion.a>
         </div>
       </div>
       
       {/* Development Banner - only for development status */}
       {isInDevelopment && (
-        <div className="absolute top-2 -right-8 bg-amber-500 text-white px-10 py-0.5 text-xs font-medium transform rotate-45">
+        <div className="absolute top-2 -right-8 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-10 py-0.5 text-xs font-bold transform rotate-45 shadow-md">
           Beta
         </div>
       )}
+
+      {/* Subtle gradient border on hover */}
+      <div className={`absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none border ${
+        isDark ? 'border-primary-500/30' : 'border-primary-500/20'
+      }`} />
     </motion.div>
   );
 }

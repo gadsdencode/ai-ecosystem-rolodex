@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Sun, Moon, Settings } from 'lucide-react';
+import { Search, Sun, Moon, Settings, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -89,7 +89,6 @@ export function AppHeader({ searchQuery, setSearchQuery }: AppHeaderProps) {
     },
     active: {
       scale: 1.02,
-      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
       transition: { 
         type: "spring", 
         stiffness: 400, 
@@ -154,10 +153,10 @@ export function AppHeader({ searchQuery, setSearchQuery }: AppHeaderProps) {
   return (
     <motion.header 
       className={`
-        sticky top-0 z-30 backdrop-blur-[10px] px-4 sm:px-6 md:px-8 transition-colors duration-300
+        sticky top-0 z-30 backdrop-blur-xl px-4 sm:px-6 md:px-8 transition-all duration-300
         ${theme === 'light' 
-          ? 'bg-white bg-opacity-70 border-b border-gray-200' 
-          : 'bg-gray-900 bg-opacity-70 border-b border-gray-800'}
+          ? 'bg-white/70 border-b border-border/50' 
+          : 'bg-slate-900/70 border-b border-white/10'}
       `}
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
@@ -170,48 +169,65 @@ export function AppHeader({ searchQuery, setSearchQuery }: AppHeaderProps) {
           initial="hidden"
           animate="visible"
         >
-          <motion.svg 
-            className="h-9 w-9 text-apple-blue" 
-            xmlns="http://www.w3.org/2000/svg" 
-            fill="none" 
-            viewBox="0 0 24 24" 
-            stroke="currentColor"
-            whileHover={{ scale: 1.1 }}
+          {/* Logo with brand gradient */}
+          <motion.div
+            className="relative"
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <motion.path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth="1.5" 
-              d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"
-              variants={pathVariants}
-              initial="hidden"
-              animate="visible"
-            />
-          </motion.svg>
-          <div className='flex flex-col'>
-          <motion.h1 
-            className="ml-3 text-2xl font-medium"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5, duration: 0.5 }}
-          >
-            AI Rolodex
-          </motion.h1>
-          <motion.h2 
-            className={`ml-3 text-xl font-medium ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5, duration: 0.5 }}
-          >
-            Overture Ecosystem
-          </motion.h2>
-            </div>
+            <motion.svg 
+              className="h-10 w-10 text-primary-500" 
+              xmlns="http://www.w3.org/2000/svg" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <defs>
+                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#6366f1" />
+                  <stop offset="50%" stopColor="#a855f7" />
+                  <stop offset="100%" stopColor="#f43f5e" />
+                </linearGradient>
+              </defs>
+              <motion.path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth="1.5" 
+                d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"
+                stroke="url(#logoGradient)"
+                variants={pathVariants}
+                initial="hidden"
+                animate="visible"
+              />
+            </motion.svg>
+            {/* Glow effect */}
+            <div className="absolute inset-0 blur-lg opacity-30 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-full -z-10" />
+          </motion.div>
+          
+          <div className='flex flex-col ml-3'>
+            <motion.h1 
+              className="text-2xl font-bold bg-gradient-to-r from-primary-500 via-secondary-500 to-accent-500 bg-clip-text text-transparent"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5, duration: 0.5 }}
+            >
+              AI Rolodex
+            </motion.h1>
+            <motion.h2 
+              className="text-sm font-medium text-muted-foreground flex items-center gap-1.5"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6, duration: 0.5 }}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-secondary-500" />
+              <span className="font-mono tracking-tight">OVERTURE ECOSYSTEM</span>
+            </motion.h2>
+          </div>
         </motion.div>
         
         {/* Search Bar */}
         <motion.div 
-          className="relative max-w-md w-full"
+          className="relative max-w-md w-full mx-4"
           variants={searchBarVariants}
           initial="initial"
           animate={isSearchActive ? "active" : "visible"}
@@ -220,7 +236,7 @@ export function AppHeader({ searchQuery, setSearchQuery }: AppHeaderProps) {
             <motion.div
               animate={{ 
                 scale: isSearchActive ? 1.1 : 1,
-                color: isSearchActive ? theme === 'light' ? '#3b82f6' : '#60a5fa' : theme === 'light' ? '#6b7280' : '#9ca3af'
+                color: isSearchActive ? '#6366f1' : theme === 'light' ? '#6b7280' : '#9ca3af'
               }}
             >
               <Search className="w-5 h-5" />
@@ -235,23 +251,23 @@ export function AppHeader({ searchQuery, setSearchQuery }: AppHeaderProps) {
             onBlur={handleSearchBlur}
             placeholder="Search AI tools..." 
             className={`
-              pl-10 pr-10 py-2.5 w-full rounded-lg 
-              focus:ring-apple-blue focus:border-apple-blue 
-              transition-colors duration-300
+              pl-10 pr-12 py-2.5 w-full rounded-xl font-medium
+              transition-all duration-300
               ${theme === 'light' 
-                ? 'border border-gray-300 bg-white bg-opacity-80 backdrop-blur-sm' 
-                : 'border border-gray-700 bg-gray-800 bg-opacity-70 text-white placeholder-gray-400'}
+                ? 'bg-white/80 border border-border/50 focus:border-primary-500/50 focus:ring-2 focus:ring-primary-500/20' 
+                : 'bg-slate-800/80 border border-white/10 focus:border-primary-500/50 focus:ring-2 focus:ring-primary-500/20 text-white placeholder-gray-400'}
+              backdrop-blur-sm
             `}
-            whileFocus={{ scale: 1.02 }}
+            whileFocus={{ scale: 1.01 }}
           />
           <AnimatePresence>
             {showSearchShortcut && (
               <motion.div 
                 className={`
-                  absolute right-2.5 top-2.5 text-xs px-1.5 py-0.5 rounded-md
+                  absolute right-3 top-1/2 -translate-y-1/2 text-xs px-2 py-1 rounded-md font-mono
                   ${theme === 'light' 
-                    ? 'text-apple-gray bg-gray-50' 
-                    : 'text-gray-400 bg-gray-700'}
+                    ? 'text-muted-foreground bg-muted/80 border border-border/50' 
+                    : 'text-gray-400 bg-slate-700/80 border border-white/10'}
                 `}
                 variants={shortcutVariants}
                 initial="hidden"
@@ -266,7 +282,7 @@ export function AppHeader({ searchQuery, setSearchQuery }: AppHeaderProps) {
         
         {/* Theme Toggle and Settings */}
         <motion.div 
-          className="flex items-center space-x-2"
+          className="flex items-center gap-2"
           variants={settingsVariants}
           initial="hidden"
           animate="visible"
@@ -275,10 +291,10 @@ export function AppHeader({ searchQuery, setSearchQuery }: AppHeaderProps) {
           <motion.button
             onClick={toggleTheme}
             className={`
-              rounded-full p-1.5 transition-colors duration-200
+              rounded-xl p-2.5 transition-all duration-200
               ${theme === 'light' 
-                ? 'text-yellow-500 hover:bg-yellow-100' 
-                : 'text-blue-400 hover:bg-gray-800'}
+                ? 'text-amber-500 hover:bg-amber-500/10 hover:shadow-[0_0_15px_rgba(245,158,11,0.3)]' 
+                : 'text-primary-400 hover:bg-primary-500/10 hover:shadow-glow'}
             `}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
@@ -294,10 +310,10 @@ export function AppHeader({ searchQuery, setSearchQuery }: AppHeaderProps) {
           {/* Settings button */}
           <motion.button 
             className={`
-              ml-2 rounded-full p-1.5 transition-colors duration-200
+              rounded-xl p-2.5 transition-all duration-200
               ${theme === 'light' 
-                ? 'text-apple-gray hover:bg-gray-200' 
-                : 'text-gray-400 hover:bg-gray-800'}
+                ? 'text-muted-foreground hover:bg-muted/80 hover:text-foreground' 
+                : 'text-gray-400 hover:bg-slate-800/80 hover:text-white'}
             `}
             aria-label="Settings"
             onClick={handleToggleThemeMenu}
@@ -308,34 +324,39 @@ export function AppHeader({ searchQuery, setSearchQuery }: AppHeaderProps) {
             <Settings className="w-5 h-5" />
           </motion.button>
           
-          {/* Theme menu dropdown (can be expanded later) */}
+          {/* Theme menu dropdown */}
           <AnimatePresence>
             {showThemeMenu && (
               <motion.div
                 className={`
-                  absolute top-16 right-4 p-4 rounded-lg shadow-lg z-50
+                  absolute top-16 right-4 p-4 rounded-xl shadow-brand-lg z-50 backdrop-blur-xl min-w-[200px]
                   ${theme === 'light' 
-                    ? 'bg-white border border-gray-200' 
-                    : 'bg-gray-800 border border-gray-700'}
+                    ? 'bg-white/95 border border-border/50' 
+                    : 'bg-slate-900/95 border border-white/10'}
                 `}
                 variants={themeMenuVariants}
                 initial="hidden"
                 animate="visible"
                 exit="exit"
               >
-                <div className="font-medium mb-2">
-                  {theme === 'light' ? 'Light Mode' : 'Dark Mode'} Active
+                <div className="font-semibold mb-2 flex items-center gap-2">
+                  {theme === 'light' ? (
+                    <Sun className="w-4 h-4 text-amber-500" />
+                  ) : (
+                    <Moon className="w-4 h-4 text-primary-400" />
+                  )}
+                  {theme === 'light' ? 'Light Mode' : 'Dark Mode'}
                 </div>
-                <div className="text-sm text-gray-500 mb-3">
-                  Click the {theme === 'light' ? 'sun' : 'moon'} icon to toggle theme
+                <div className="text-sm text-muted-foreground mb-4">
+                  Click the {theme === 'light' ? 'sun' : 'moon'} icon to toggle
                 </div>
                 <button
                   onClick={() => setShowThemeMenu(false)}
                   className={`
-                    text-sm px-3 py-1 rounded
+                    text-sm px-4 py-2 rounded-lg w-full font-medium transition-all
                     ${theme === 'light' 
-                      ? 'bg-gray-100 hover:bg-gray-200 text-gray-700' 
-                      : 'bg-gray-700 hover:bg-gray-600 text-gray-300'}
+                      ? 'bg-muted hover:bg-muted/80 text-foreground' 
+                      : 'bg-slate-800 hover:bg-slate-700 text-white'}
                   `}
                 >
                   Close

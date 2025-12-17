@@ -1,5 +1,8 @@
 import { useEffect } from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, X, Trash2 } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
+import { Button } from '@/components/ui/button';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ConfirmDeleteModalProps {
   isOpen: boolean;
@@ -9,7 +12,8 @@ interface ConfirmDeleteModalProps {
 }
 
 export function ConfirmDeleteModal({ isOpen, toolName, onClose, onConfirm }: ConfirmDeleteModalProps) {
-  // Register keyboard shortcut for Escape to close modal
+  const { theme } = useTheme();
+
   useEffect(() => {
     const handleKeydown = (e: KeyboardEvent) => {
       if (isOpen && e.key === 'Escape') {
@@ -24,35 +28,71 @@ export function ConfirmDeleteModal({ isOpen, toolName, onClose, onConfirm }: Con
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity duration-300">
-      <div className="modal-content bg-glass-dark rounded-xl overflow-hidden shadow-lg max-w-md w-full mx-4 border border-white border-opacity-40 animate-in fade-in">
-        <div className="p-6">
-          <div className="flex items-center justify-center mb-4 text-apple-red">
-            <AlertTriangle className="w-12 h-12" />
-          </div>
-          <h2 className="text-xl font-semibold text-center text-gray-900 mb-2">Confirm Deletion</h2>
-          <p className="text-center text-gray-700 mb-6">
-            Are you sure you want to delete <span className="font-medium">{toolName}</span>? This action cannot be undone.
-          </p>
-          
-          <div className="flex space-x-3">
-            <button 
-              type="button" 
-              className="flex-1 px-4 py-2.5 bg-gray-200 text-gray-800 rounded-lg font-medium hover:bg-gray-300 transition-colors duration-200"
-              onClick={onClose}
-            >
-              Cancel
-            </button>
-            <button 
-              type="button" 
-              className="flex-1 px-4 py-2.5 bg-apple-red text-white rounded-lg font-medium hover:bg-red-700 transition-colors duration-200"
-              onClick={onConfirm}
-            >
-              Delete
-            </button>
-          </div>
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <motion.div 
+            className={`relative rounded-2xl overflow-hidden shadow-brand-xl max-w-md w-full mx-4 ${
+              theme === 'light'
+                ? 'bg-white/95 border border-white/50'
+                : 'bg-slate-900/95 border border-white/10'
+            } backdrop-blur-xl`}
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ type: "spring", duration: 0.5 }}
+          >
+            <div className="p-6">
+              {/* Warning Icon */}
+              <motion.div 
+                className="flex justify-center mb-5"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+              >
+                <div className="relative">
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-accent-500/20 to-accent-600/20 border border-accent-500/30">
+                    <AlertTriangle className="w-10 h-10 text-accent-500" />
+                  </div>
+                  <div className="absolute inset-0 rounded-2xl bg-accent-500/20 blur-xl -z-10" />
+                </div>
+              </motion.div>
+              
+              {/* Title */}
+              <h2 className="text-xl font-semibold text-center text-foreground mb-2">
+                Confirm Deletion
+              </h2>
+              
+              {/* Description */}
+              <p className="text-center text-muted-foreground mb-6">
+                Are you sure you want to delete{' '}
+                <span className="font-semibold text-foreground">{toolName}</span>?
+                <br />
+                <span className="text-sm">This action cannot be undone.</span>
+              </p>
+              
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                <Button 
+                  variant="outline"
+                  className="flex-1"
+                  onClick={onClose}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  variant="glow-rose"
+                  className="flex-1"
+                  onClick={onConfirm}
+                >
+                  <Trash2 className="w-4 h-4 mr-1.5" />
+                  Delete
+                </Button>
+              </div>
+            </div>
+          </motion.div>
         </div>
-      </div>
-    </div>
+      )}
+    </AnimatePresence>
   );
 }
