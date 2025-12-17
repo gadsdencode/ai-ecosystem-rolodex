@@ -1,18 +1,22 @@
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Sparkles, Layers } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTheme } from '../contexts/ThemeContext';
+import { Button } from '@/components/ui/button';
 
 interface EmptyStateProps {
   onAddNew: () => void;
 }
 
 export function EmptyState({ onAddNew }: EmptyStateProps) {
+  const { theme } = useTheme();
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        delayChildren: 0.3,
-        staggerChildren: 0.2
+        delayChildren: 0.2,
+        staggerChildren: 0.15
       }
     }
   };
@@ -30,69 +34,97 @@ export function EmptyState({ onAddNew }: EmptyStateProps) {
     }
   };
 
-  const svgVariants = {
-    hidden: { opacity: 0, pathLength: 0 },
-    visible: {
-      opacity: 1,
-      pathLength: 1,
-      transition: {
-        duration: 2,
-        ease: "easeInOut"
-      }
-    }
-  };
-
   return (
     <motion.div 
-      className="flex flex-col items-center justify-center py-16 px-4"
+      className="flex flex-col items-center justify-center py-20 px-4"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      <motion.svg 
-        className="w-20 h-20 text-apple-gray mb-4 opacity-50" 
-        xmlns="http://www.w3.org/2000/svg" 
-        fill="none" 
-        viewBox="0 0 24 24" 
-        stroke="currentColor"
+      {/* Animated Icon */}
+      <motion.div
+        className="relative mb-6"
         variants={itemVariants}
       >
-        <motion.path 
-          strokeLinecap="round" 
-          strokeLinejoin="round" 
-          strokeWidth="1" 
-          d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5"
-          variants={svgVariants}
-        />
-      </motion.svg>
+        <div className="relative">
+          <motion.div 
+            className="p-6 rounded-3xl bg-gradient-to-br from-primary-500/10 via-secondary-500/10 to-accent-500/10 border border-primary-500/20"
+            animate={{ 
+              boxShadow: [
+                "0 0 20px rgba(99, 102, 241, 0.1)",
+                "0 0 40px rgba(168, 85, 247, 0.15)",
+                "0 0 20px rgba(99, 102, 241, 0.1)"
+              ]
+            }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <Layers className="w-16 h-16 text-primary-500/50" />
+          </motion.div>
+          
+          {/* Floating sparkles */}
+          <motion.div
+            className="absolute -top-2 -right-2"
+            animate={{ y: [-2, 2, -2], rotate: [0, 10, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <Sparkles className="w-6 h-6 text-secondary-500" />
+          </motion.div>
+          
+          <motion.div
+            className="absolute -bottom-1 -left-1"
+            animate={{ y: [2, -2, 2], rotate: [0, -10, 0] }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+          >
+            <Sparkles className="w-4 h-4 text-accent-500" />
+          </motion.div>
+        </div>
+        
+        {/* Background glow */}
+        <div className="absolute inset-0 blur-3xl opacity-30">
+          <div className="w-full h-full bg-gradient-to-br from-primary-500 via-secondary-500 to-accent-500 rounded-full" />
+        </div>
+      </motion.div>
       
+      {/* Title */}
       <motion.h3 
-        className="text-xl font-medium text-gray-900 mb-2"
+        className="text-2xl font-semibold text-foreground mb-3"
         variants={itemVariants}
       >
         No AI tools found
       </motion.h3>
       
+      {/* Description */}
       <motion.p 
-        className="text-apple-gray text-center max-w-md mb-6"
+        className="text-muted-foreground text-center max-w-md mb-8"
         variants={itemVariants}
       >
-        Your AI ecosystem is empty. Add your first AI tool to start building your collection.
+        Your AI ecosystem is empty. Add your first AI tool to start building your curated collection of powerful AI applications.
       </motion.p>
       
-      <motion.button 
-        className="px-5 py-2.5 bg-apple-blue text-white rounded-lg flex items-center hover:bg-blue-600 transition-colors duration-200"
-        onClick={onAddNew}
+      {/* CTA Button */}
+      <motion.div variants={itemVariants}>
+        <Button 
+          variant="brand"
+          size="lg"
+          onClick={onAddNew}
+          className="shadow-brand-lg"
+        >
+          <PlusCircle className="w-5 h-5 mr-2" />
+          Add your first AI tool
+        </Button>
+      </motion.div>
+      
+      {/* Helper text */}
+      <motion.p 
+        className="mt-6 text-sm text-muted-foreground"
         variants={itemVariants}
-        whileHover={{ 
-          scale: 1.05,
-          boxShadow: "0 10px 15px -3px rgba(59, 130, 246, 0.4), 0 4px 6px -2px rgba(59, 130, 246, 0.2)"
-        }}
-        whileTap={{ scale: 0.95 }}
       >
-        <PlusCircle className="w-5 h-5 mr-2" />
-        Add your first AI tool
-      </motion.button>
+        Press <kbd className={`px-2 py-0.5 rounded font-mono text-xs ${
+          theme === 'light'
+            ? 'bg-muted border border-border/50'
+            : 'bg-slate-800 border border-white/10'
+        }`}>⌘ N</kbd> to quickly add a new tool
+      </motion.p>
     </motion.div>
   );
 }

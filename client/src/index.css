@@ -2,50 +2,136 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   OVERTURE SYSTEMS SOLUTIONS - Design System
+   Premium Brand Palette: Deep Ocean Blues, 
+   Electric Purples, Vibrant Rose Accents
+   ============================================ */
+
 @layer base {
   :root {
-    --background: 0 0% 98%;
-    --foreground: 240 10% 3.9%;
+    /* Base radius for consistent rounding */
+    --radius: 0.625rem;
+    
+    /* Light Theme - Clean & Professional */
+    --background: 0 0% 99%;
+    --foreground: 240 10% 10%;
+    
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 240 10% 10%;
+    
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 209 100% 45%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 209 100% 45%;
-    --radius: 0.5rem;
+    --popover-foreground: 240 10% 10%;
+    
+    /* Primary - Indigo */
+    --primary: 239 84% 67%;
+    --primary-foreground: 0 0% 100%;
+    
+    /* Secondary - Soft gray with warmth */
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 6% 10%;
+    
+    /* Muted - Subtle backgrounds */
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 46%;
+    
+    /* Accent - For highlights */
+    --accent: 240 5% 96%;
+    --accent-foreground: 240 6% 10%;
+    
+    /* Destructive - Rose/Red */
+    --destructive: 350 89% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Borders & Inputs */
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 239 84% 67%;
+    
+    /* Chart Colors - Vibrant data viz */
+    --chart-1: 239 84% 67%;  /* Indigo */
+    --chart-2: 270 91% 65%;  /* Purple */
+    --chart-3: 350 89% 60%;  /* Rose */
+    --chart-4: 142 76% 36%;  /* Emerald */
+    --chart-5: 38 92% 50%;   /* Amber */
+    
+    /* Sidebar - Light mode */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 10% 10%;
+    --sidebar-primary: 239 84% 67%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 5% 96%;
+    --sidebar-accent-foreground: 240 6% 10%;
+    --sidebar-border: 240 6% 90%;
+    --sidebar-ring: 239 84% 67%;
+    
+    /* AI Accent - Purple glow */
+    --ai-accent: 270 91% 65%;
+    
+    /* Brand gradients as CSS properties */
+    --brand-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #f43f5e 100%);
+    --brand-gradient-soft: linear-gradient(135deg, rgba(99,102,241,0.1) 0%, rgba(168,85,247,0.1) 50%, rgba(244,63,94,0.1) 100%);
   }
 
   .dark {
-    --background: 240 10% 3.9%;
+    /* Dark Theme - Deep Ocean / Premium Tech */
+    --background: 240 10% 6%;
     --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
+    
+    --card: 240 10% 10%;
     --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
+    
+    --popover: 240 10% 10%;
     --popover-foreground: 0 0% 98%;
-    --primary: 209 100% 45%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 3.7% 15.9%;
+    
+    /* Primary - Brighter Indigo for dark mode */
+    --primary: 239 84% 67%;
+    --primary-foreground: 0 0% 100%;
+    
+    /* Secondary - Deep slate */
+    --secondary: 240 6% 16%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
+    
+    /* Muted - Deep backgrounds */
+    --muted: 240 6% 16%;
+    --muted-foreground: 240 5% 65%;
+    
+    /* Accent - Subtle highlight */
+    --accent: 240 6% 16%;
     --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 209 100% 45%;
+    
+    /* Destructive - Brighter rose for visibility */
+    --destructive: 350 89% 65%;
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Borders & Inputs - Subtle in dark */
+    --border: 240 6% 20%;
+    --input: 240 6% 20%;
+    --ring: 239 84% 67%;
+    
+    /* Chart Colors - Vivid for dark mode */
+    --chart-1: 239 84% 70%;  /* Indigo */
+    --chart-2: 270 91% 70%;  /* Purple */
+    --chart-3: 350 89% 65%;  /* Rose */
+    --chart-4: 142 76% 50%;  /* Emerald */
+    --chart-5: 38 92% 55%;   /* Amber */
+    
+    /* Sidebar - Dark mode */
+    --sidebar-background: 240 10% 8%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 239 84% 70%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 6% 16%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 240 6% 20%;
+    --sidebar-ring: 239 84% 70%;
+    
+    /* AI Accent - Purple glow for dark */
+    --ai-accent: 270 91% 70%;
+    
+    /* Brand gradients for dark mode */
+    --brand-gradient: linear-gradient(135deg, #818cf8 0%, #c084fc 50%, #fb7185 100%);
+    --brand-gradient-soft: linear-gradient(135deg, rgba(129,140,248,0.15) 0%, rgba(192,132,252,0.15) 50%, rgba(251,113,133,0.15) 100%);
   }
 }
 
@@ -54,177 +140,286 @@
     @apply border-border;
   }
 
+  html {
+    @apply scroll-smooth;
+  }
+
   body {
-    @apply font-sans antialiased bg-background text-foreground transition-colors duration-300;
+    @apply font-sans antialiased bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
   
-  /* Light theme background */
-  .light body {
-    background-color: #F5F5F7;
+  /* Light theme background with mesh gradient */
+  .light body,
+  :root body {
+    background-color: hsl(0 0% 99%);
     background-image: 
-      radial-gradient(circle at 20% 20%, rgba(0, 113, 227, 0.08), transparent 25%),
-      radial-gradient(circle at 80% 80%, rgba(52, 199, 89, 0.08), transparent 25%);
+      radial-gradient(ellipse at 20% 0%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(168, 85, 247, 0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 40% 100%, rgba(244, 63, 94, 0.04) 0%, transparent 50%);
     background-attachment: fixed;
-    background-size: 100% 100%;
+    min-height: 100vh;
   }
   
-  /* Dark theme background */
+  /* Dark theme background - Deep Ocean */
   .dark body {
-    background-color: #111213;
+    background-color: hsl(240 10% 6%);
     background-image: 
-      radial-gradient(circle at 20% 20%, rgba(0, 113, 227, 0.15), transparent 25%),
-      radial-gradient(circle at 80% 80%, rgba(52, 199, 89, 0.15), transparent 25%);
+      radial-gradient(ellipse at 20% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(168, 85, 247, 0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at 40% 100%, rgba(244, 63, 94, 0.08) 0%, transparent 50%);
     background-attachment: fixed;
-    background-size: 100% 100%;
+    min-height: 100vh;
+  }
+
+  /* Focus styles */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
 }
 
-/* Apple-inspired color variables */
+/* ============================================
+   Component Utilities
+   ============================================ */
+
 @layer utilities {
-  /* Light theme colors */
-  .light .text-apple-blue {
-    color: #0071E3;
+  /* Text shadows for buttons and emphasis */
+  .text-shadow-button-light {
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.5);
   }
   
-  .light .text-apple-gray {
-    color: #86868B;
+  .text-shadow-button-dark {
+    text-shadow: 0 2px 12px rgba(99, 102, 241, 0.8), 0 1px 4px rgba(0, 0, 0, 0.4);
   }
   
-  .light .bg-apple-blue {
-    background-color: #0071E3;
+  /* Glass morphism effects */
+  .glass {
+    @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl;
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
   
-  .light .hover\:bg-blue-600:hover {
-    background-color: #0058B9;
+  .glass-dark {
+    @apply bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl;
+    border: 1px solid rgba(255, 255, 255, 0.3);
   }
   
-  .light .bg-apple-red {
-    background-color: #FF3B30;
+  .glass-card {
+    @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   }
   
-  .light .text-apple-red {
-    color: #FF3B30;
+  /* AI/Tech gradient backgrounds */
+  .ai-gradient {
+    background: var(--brand-gradient);
+    background-size: 200% 200%;
+    animation: gradient-flow 5s ease infinite;
   }
   
-  .light .bg-glass {
-    background-color: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+  .ai-gradient-soft {
+    background: var(--brand-gradient-soft);
   }
   
-  .light .bg-glass-dark {
-    background-color: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+  .ai-gradient-text {
+    background: var(--brand-gradient);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
   
-  .light .shadow-apple {
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  /* Glowing effects */
+  .glow-indigo {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.4), 0 0 40px rgba(99, 102, 241, 0.2);
   }
   
-  .light .shadow-apple-hover {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  .glow-purple {
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.4), 0 0 40px rgba(168, 85, 247, 0.2);
   }
   
-  /* Dark theme colors */
-  .dark .text-apple-blue {
-    color: #0A84FF;
+  .glow-rose {
+    box-shadow: 0 0 20px rgba(244, 63, 94, 0.4), 0 0 40px rgba(244, 63, 94, 0.2);
   }
   
-  .dark .text-apple-gray {
-    color: #98989D;
+  .glow-brand {
+    box-shadow: 
+      0 0 20px rgba(99, 102, 241, 0.3),
+      0 0 40px rgba(168, 85, 247, 0.2),
+      0 0 60px rgba(244, 63, 94, 0.1);
   }
   
-  .dark .bg-apple-blue {
-    background-color: #0A84FF;
+  /* Border gradient effect */
+  .border-gradient {
+    position: relative;
+    background: hsl(var(--card));
+    border-radius: var(--radius);
   }
   
-  .dark .hover\:bg-blue-600:hover {
-    background-color: #007AFF;
+  .border-gradient::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: calc(var(--radius) + 1px);
+    background: var(--brand-gradient);
+    z-index: -1;
   }
   
-  .dark .bg-apple-red {
-    background-color: #FF453A;
+  /* Animated border beam */
+  .border-beam {
+    position: relative;
+    overflow: hidden;
   }
   
-  .dark .text-apple-red {
-    color: #FF453A;
+  .border-beam::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      var(--border-beam-angle, 0deg),
+      transparent 40%,
+      #6366f1 50%,
+      #a855f7 60%,
+      transparent 70%
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: border-beam-rotate 4s linear infinite;
   }
   
-  .dark .bg-glass {
-    background-color: rgba(30, 30, 30, 0.7);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+  @keyframes border-beam-rotate {
+    to {
+      --border-beam-angle: 360deg;
+    }
   }
   
-  .dark .bg-glass-dark {
-    background-color: rgba(30, 30, 30, 0.85);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+  /* Shimmer effect for loading states */
+  .shimmer {
+    position: relative;
+    overflow: hidden;
   }
   
-  .dark .shadow-apple {
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  .shimmer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.2) 50%,
+      transparent 100%
+    );
+    animation: shimmer 2s linear infinite;
   }
   
-  .dark .shadow-apple-hover {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
   
-  /* Default colors (for compatibility) */
-  .text-apple-blue {
-    color: #0071E3;
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
   
-  .text-apple-gray {
-    color: #86868B;
+  /* Custom scrollbar styling */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
   }
   
-  .bg-apple-blue {
-    background-color: #0071E3;
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
   }
   
-  .hover\:bg-blue-600:hover {
-    background-color: #0058B9;
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
   }
   
-  .bg-apple-red {
-    background-color: #FF3B30;
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 3px;
   }
   
-  .text-apple-red {
-    color: #FF3B30;
-  }
-  
-  .bg-glass {
-    background-color: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-  }
-  
-  .bg-glass-dark {
-    background-color: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground) / 0.5);
   }
 }
 
-/* Animation classes */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+/* ============================================
+   Animation Utilities
+   ============================================ */
+
+@layer utilities {
+  /* Stagger animation delays for lists */
+  .stagger-1 { animation-delay: 0.1s; }
+  .stagger-2 { animation-delay: 0.2s; }
+  .stagger-3 { animation-delay: 0.3s; }
+  .stagger-4 { animation-delay: 0.4s; }
+  .stagger-5 { animation-delay: 0.5s; }
+  
+  /* Initial state for animations */
+  .animate-in {
+    animation-fill-mode: both;
+  }
+  
+  /* Gradient text animation */
+  .animate-gradient-text {
+    background-size: 200% auto;
+    animation: gradient-flow 3s linear infinite;
+  }
 }
 
-.fade-in {
-  animation: fadeIn 0.3s ease-out forwards;
+/* ============================================
+   Keyframe Definitions
+   ============================================ */
+
+@keyframes gradient-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-/* Hide scrollbar but keep functionality */
-.scrollbar-hide {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
-.scrollbar-hide::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { 
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+  }
+  50% { 
+    box-shadow: 0 0 30px rgba(99, 102, 241, 0.6), 0 0 60px rgba(168, 85, 247, 0.3);
+  }
+}
+
+/* ============================================
+   Prose Styling for Rich Content
+   ============================================ */
+
+.prose-brand {
+  --tw-prose-links: #6366f1;
+  --tw-prose-invert-links: #818cf8;
+}
+
+/* ============================================
+   Selection Styling
+   ============================================ */
+
+::selection {
+  background-color: rgba(99, 102, 241, 0.3);
+  color: inherit;
+}
+
+.dark ::selection {
+  background-color: rgba(129, 140, 248, 0.4);
 }

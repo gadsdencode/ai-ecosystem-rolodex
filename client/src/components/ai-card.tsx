@@ -1,10 +1,11 @@
 import { AiTool } from '@shared/schema';
-import { COLOR_GRADIENTS, CATEGORY_COLORS } from '../types';
+import { COLOR_GRADIENTS } from '../types';
 import { getCategoryIcon } from '../lib/icons';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
-import { Server, Code, ChevronUp, ChevronDown } from 'lucide-react';
+import { Server, Code, ChevronUp, ChevronDown, ExternalLink, Pencil, Trash2 } from 'lucide-react';
 import { StatusToggle } from './status-toggle';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface AiCardProps {
   tool: AiTool;
@@ -15,7 +16,7 @@ interface AiCardProps {
   showDevelopmentStatus?: boolean;
 }
 
-// Card animation variants
+// Card animation variants with brand aesthetic
 const cardVariants = {
   hidden: { 
     opacity: 0,
@@ -36,7 +37,6 @@ const cardVariants = {
   hover: {
     y: -8,
     scale: 1.02,
-    boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
     transition: {
       type: "spring",
       stiffness: 400,
@@ -45,13 +45,61 @@ const cardVariants = {
   },
   tap: {
     scale: 0.98,
-    boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
     transition: {
       type: "spring",
       stiffness: 400,
       damping: 15
     }
   }
+};
+
+// Category badge color mapping for proper Tailwind class generation
+const getCategoryBadgeClasses = (category: string, theme: string) => {
+  const categoryMap: Record<string, { light: string; dark: string }> = {
+    'text-generation': {
+      light: 'bg-primary-100 text-primary-700',
+      dark: 'bg-primary-900/40 text-primary-300'
+    },
+    'image-generation': {
+      light: 'bg-secondary-100 text-secondary-700',
+      dark: 'bg-secondary-900/40 text-secondary-300'
+    },
+    'code-assistant': {
+      light: 'bg-emerald-100 text-emerald-700',
+      dark: 'bg-emerald-900/40 text-emerald-300'
+    },
+    'productivity': {
+      light: 'bg-amber-100 text-amber-700',
+      dark: 'bg-amber-900/40 text-amber-300'
+    },
+    'research': {
+      light: 'bg-cyan-100 text-cyan-700',
+      dark: 'bg-cyan-900/40 text-cyan-300'
+    },
+    'professional-development': {
+      light: 'bg-primary-100 text-primary-700',
+      dark: 'bg-primary-900/40 text-primary-300'
+    },
+    'personal-development': {
+      light: 'bg-secondary-100 text-secondary-700',
+      dark: 'bg-secondary-900/40 text-secondary-300'
+    },
+    'education': {
+      light: 'bg-emerald-100 text-emerald-700',
+      dark: 'bg-emerald-900/40 text-emerald-300'
+    },
+    'healthcare': {
+      light: 'bg-accent-100 text-accent-700',
+      dark: 'bg-accent-900/40 text-accent-300'
+    },
+    'other': {
+      light: 'bg-slate-100 text-slate-700',
+      dark: 'bg-slate-800/40 text-slate-300'
+    }
+  };
+
+  const colors = categoryMap[category] || categoryMap['other'];
+  return theme === 'dark' ? colors.dark : colors.light;
 };
 
 export function AiCard({ 
@@ -62,6 +110,7 @@ export function AiCard({
   onChangeStatus,
   showDevelopmentStatus = false 
 }: AiCardProps) {
+  const { theme } = useTheme();
   const { from, to } = COLOR_GRADIENTS[tool.iconColor as keyof typeof COLOR_GRADIENTS] || COLOR_GRADIENTS.blue;
   const CategoryIcon = getCategoryIcon(tool.category);
   
@@ -75,9 +124,15 @@ export function AiCard({
     }
   };
 
+  const categoryBadgeClasses = getCategoryBadgeClasses(tool.category, theme);
+
   return (
     <motion.div 
-      className="card group bg-glass rounded-xl overflow-hidden shadow-apple border border-white border-opacity-40 cursor-pointer relative"
+      className={`group relative backdrop-blur-lg rounded-xl overflow-hidden cursor-pointer transition-shadow duration-300 ${
+        theme === 'dark'
+          ? 'bg-slate-900/80 border border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_30px_rgba(99,102,241,0.15)]'
+          : 'bg-white/80 border border-white/50 shadow-lg hover:shadow-brand-lg'
+      }`}
       onClick={handleCardClick}
       variants={cardVariants}
       initial="hidden"
@@ -86,23 +141,34 @@ export function AiCard({
       whileTap="tap"
       layout
     >
+      {/* Gradient header with category icon */}
       <div className="relative">
-        <div className={`h-48 bg-gradient-to-br ${from} ${to} flex items-center justify-center`}>
-          <CategoryIcon className="w-20 h-20 text-white" />
+        <div className={`h-44 bg-gradient-to-br ${from} ${to} flex items-center justify-center relative overflow-hidden`}>
+          {/* Subtle pattern overlay */}
+          <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.8),transparent_70%)]" />
+          
+          <CategoryIcon className="w-20 h-20 text-white drop-shadow-lg relative z-10" />
+          
+          {/* Glow effect on hover */}
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-30 transition-opacity duration-300 bg-gradient-to-t from-transparent via-white/20 to-transparent" />
         </div>
 
-        {/* Provider badge - shown in top left corner */}
-        <div className="absolute top-3 left-3 flex space-x-2">
+        {/* Provider & Status badges - top left */}
+        <div className="absolute top-3 left-3 flex flex-wrap gap-2">
           {tool.provider === 'overture' ? (
             <motion.div 
-              className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full shadow-sm"
+              className="px-2.5 py-1 bg-gradient-to-r from-primary-500/90 to-secondary-500/90 text-white text-xs font-semibold rounded-full shadow-md backdrop-blur-sm"
               whileHover={{ scale: 1.05 }}
             >
-              Overture
+              <span className="font-mono tracking-tight">OVERTURE</span>
             </motion.div>
           ) : (
             <motion.div 
-              className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full shadow-sm"
+              className={`px-2.5 py-1 text-xs font-medium rounded-full shadow-md backdrop-blur-sm border ${
+                theme === 'dark'
+                  ? 'bg-slate-800/90 text-slate-300 border-white/10'
+                  : 'bg-white/90 text-slate-600 border-white/20'
+              }`}
               whileHover={{ scale: 1.05 }}
             >
               Third Party
@@ -112,35 +178,38 @@ export function AiCard({
           {/* Development Status Badge */}
           {showDevelopmentStatus && (
             <motion.div 
-              className={`px-2 py-1 ${
+              className={`px-2.5 py-1 text-xs font-semibold rounded-full shadow-md backdrop-blur-sm flex items-center gap-1 ${
                 tool.developmentStatus === 'development' 
-                  ? 'bg-orange-100 text-orange-800' 
-                  : 'bg-blue-100 text-blue-800'
-              } text-xs font-medium rounded-full shadow-sm flex items-center`}
+                  ? 'bg-gradient-to-r from-amber-500/90 to-orange-500/90 text-white' 
+                  : 'bg-gradient-to-r from-emerald-500/90 to-teal-500/90 text-white'
+              }`}
               whileHover={{ scale: 1.05 }}
             >
               {tool.developmentStatus === 'development' ? (
                 <>
-                  <Code className="w-3 h-3 mr-1" />
-                  Dev
+                  <Code className="w-3 h-3" />
+                  <span className="font-mono">DEV</span>
                 </>
               ) : (
                 <>
-                  <Server className="w-3 h-3 mr-1" />
-                  Prod
+                  <Server className="w-3 h-3" />
+                  <span className="font-mono">PROD</span>
                 </>
               )}
             </motion.div>
           )}
         </div>
 
-        <div className="absolute top-3 right-3 flex space-x-2">
+        {/* Action buttons - top right */}
+        <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           {/* Development Status Control */}
           {showDevelopmentStatus && onChangeStatus && (
             <>
               {tool.developmentStatus === 'development' ? (
                 <motion.button 
-                  className="p-1.5 rounded-full bg-white bg-opacity-80 text-blue-600 hover:bg-blue-500 hover:text-white transition-all duration-200 backdrop-blur-sm" 
+                  className={`p-2 rounded-lg text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all duration-200 backdrop-blur-sm shadow-md ${
+                    theme === 'dark' ? 'bg-slate-800/90' : 'bg-white/90'
+                  }`}
                   aria-label="Move to Production"
                   onClick={() => onChangeStatus('production')}
                   title="Move to Production"
@@ -151,7 +220,9 @@ export function AiCard({
                 </motion.button>
               ) : (
                 <motion.button 
-                  className="p-1.5 rounded-full bg-white bg-opacity-80 text-orange-600 hover:bg-orange-500 hover:text-white transition-all duration-200 backdrop-blur-sm" 
+                  className={`p-2 rounded-lg text-amber-600 hover:bg-amber-500 hover:text-white transition-all duration-200 backdrop-blur-sm shadow-md ${
+                    theme === 'dark' ? 'bg-slate-800/90' : 'bg-white/90'
+                  }`}
                   aria-label="Move to Development"
                   onClick={() => onChangeStatus('development')}
                   title="Move to Development"
@@ -165,74 +236,112 @@ export function AiCard({
           )}
 
           <motion.button 
-            className="p-1.5 rounded-full bg-white bg-opacity-80 text-gray-600 hover:bg-opacity-100 transition-all duration-200 backdrop-blur-sm" 
+            className={`p-2 rounded-lg hover:bg-primary-500 hover:text-white transition-all duration-200 backdrop-blur-sm shadow-md ${
+              theme === 'dark' 
+                ? 'bg-slate-800/90 text-slate-400' 
+                : 'bg-white/90 text-slate-500'
+            }`}
             aria-label="Edit"
             onClick={onEdit}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
           >
-            <svg className="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-            </svg>
+            <Pencil className="w-4 h-4" />
           </motion.button>
           
           <motion.button 
-            className="p-1.5 rounded-full bg-white bg-opacity-80 text-gray-600 hover:bg-apple-red hover:text-white transition-all duration-200 backdrop-blur-sm" 
+            className={`p-2 rounded-lg hover:bg-accent-500 hover:text-white transition-all duration-200 backdrop-blur-sm shadow-md ${
+              theme === 'dark' 
+                ? 'bg-slate-800/90 text-slate-400' 
+                : 'bg-white/90 text-slate-500'
+            }`}
             aria-label="Delete"
             onClick={onDelete}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
           >
-            <svg className="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
+            <Trash2 className="w-4 h-4" />
           </motion.button>
         </div>
       </div>
+
+      {/* Card content */}
       <div className="p-5">
-        <div className="flex justify-between items-start">
-          <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">{tool.name}</h3>
+        <div className="flex justify-between items-start gap-3 mb-3">
+          <h3 className={`text-lg font-semibold leading-tight ${
+            theme === 'dark' ? 'text-white' : 'text-slate-900'
+          }`}>
+            {tool.name}
+          </h3>
           <motion.span 
-            className={`px-2 py-1 bg-${CATEGORY_COLORS[tool.category as keyof typeof CATEGORY_COLORS]}-100 text-${CATEGORY_COLORS[tool.category as keyof typeof CATEGORY_COLORS]}-800 rounded-md text-xs font-medium`}
+            className={`shrink-0 px-2.5 py-1 rounded-lg text-xs font-medium ${categoryBadgeClasses}`}
             whileHover={{ scale: 1.05 }}
           >
             {tool.category.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
           </motion.span>
         </div>
-        <p className="text-apple-gray text-sm mb-3">{tool.description}</p>
+        
+        <p className={`text-sm mb-4 line-clamp-2 ${
+          theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+        }`}>
+          {tool.description}
+        </p>
+        
+        {/* Tags */}
         <div className="mb-4">
           <div className="flex flex-wrap gap-2">
             {tool.tags.slice(0, 3).map((tag, index) => (
               <motion.span 
                 key={index} 
-                className="px-2 py-0.5 bg-gray-100 text-apple-gray rounded-full text-xs font-medium"
-                whileHover={{ scale: 1.05, backgroundColor: "#f3f4f6" }}
+                className={`px-2.5 py-1 rounded-full text-xs font-medium border ${
+                  theme === 'dark'
+                    ? 'bg-slate-800/50 text-slate-400 border-slate-700/50'
+                    : 'bg-slate-100/80 text-slate-600 border-slate-200/50'
+                }`}
+                whileHover={{ scale: 1.05 }}
               >
                 {tag}
               </motion.span>
             ))}
             {tool.tags.length > 3 && (
               <motion.span 
-                className="px-2 py-0.5 bg-gray-100 text-apple-gray rounded-full text-xs font-medium"
-                whileHover={{ scale: 1.05, backgroundColor: "#f3f4f6" }}
+                className={`px-2.5 py-1 rounded-full text-xs font-medium border ${
+                  theme === 'dark'
+                    ? 'bg-slate-800/50 text-slate-400 border-slate-700/50'
+                    : 'bg-slate-100/80 text-slate-600 border-slate-200/50'
+                }`}
+                whileHover={{ scale: 1.05 }}
               >
-                +{tool.tags.length - 3} more
+                +{tool.tags.length - 3}
               </motion.span>
             )}
           </div>
         </div>
-        <div className="pt-2 border-t border-gray-200 flex justify-between items-center">
-          <span className="text-xs text-apple-gray">Added: {formattedDate}</span>
+
+        {/* Footer */}
+        <div className={`pt-3 border-t flex justify-between items-center ${
+          theme === 'dark' ? 'border-slate-700/50' : 'border-slate-200/50'
+        }`}>
+          <span className={`text-xs font-mono ${
+            theme === 'dark' ? 'text-slate-500' : 'text-slate-500'
+          }`}>
+            {formattedDate}
+          </span>
           <motion.a 
             href={tool.url} 
             target="_blank" 
             rel="noopener noreferrer" 
-            className="text-apple-blue text-sm font-medium hover:underline"
+            className={`inline-flex items-center gap-1.5 text-sm font-medium transition-colors ${
+              theme === 'dark'
+                ? 'text-primary-400 hover:text-primary-300'
+                : 'text-primary-500 hover:text-primary-600'
+            }`}
             onClick={(e) => e.stopPropagation()}
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1.05, x: 2 }}
             whileTap={{ scale: 0.95 }}
           >
             Open Tool
+            <ExternalLink className="w-3.5 h-3.5" />
           </motion.a>
         </div>
       </div>
@@ -245,11 +354,15 @@ export function AiCard({
             if (onChangeStatus) {
               onChangeStatus(newStatus);
             }
-            // Return a resolved promise
             return Promise.resolve();
           }} 
         />
       )}
+
+      {/* Subtle gradient border on hover */}
+      <div className={`absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none border ${
+        theme === 'dark' ? 'border-primary-500/30' : 'border-primary-500/20'
+      }`} />
     </motion.div>
   );
 }
