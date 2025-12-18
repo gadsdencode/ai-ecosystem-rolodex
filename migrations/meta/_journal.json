@@ -8,6 +8,20 @@
       "when": 1744021410640,
       "tag": "0000_next_argent",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1744021410641,
+      "tag": "0001_add_development_status",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1734537600000,
+      "tag": "0002_add_user_email",
+      "breakpoints": true
     }
   ]
 }

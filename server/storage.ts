@@ -1,6 +1,20 @@
 import { users, type User, type InsertUser, aiTools, AiTool, AiToolFormData } from "@shared/schema";
 import { db, executeWithRetry } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, count } from "drizzle-orm";
+
+// Pagination options interface
+export interface PaginationOptions {
+  limit?: number;
+  offset?: number;
+}
+
+// Paginated result interface
+export interface PaginatedResult<T> {
+  data: T[];
+  total: number;
+  limit: number;
+  offset: number;
+}
 
 // Interface for all storage operations
 export interface IStorage {
@@ -10,7 +24,7 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   
   // AI Tool methods
-  getAllAiTools(): Promise<AiTool[]>;
+  getAllAiTools(options?: PaginationOptions): Promise<PaginatedResult<AiTool>>;
   getAiTool(id: number): Promise<AiTool | undefined>;
   createAiTool(tool: AiToolFormData): Promise<AiTool>;
   updateAiTool(id: number, tool: AiToolFormData): Promise<AiTool>;
@@ -42,9 +56,27 @@ export class DatabaseStorage implements IStorage {
   }
   
   // AI Tool methods
-  async getAllAiTools(): Promise<AiTool[]> {
+  async getAllAiTools(options?: PaginationOptions): Promise<PaginatedResult<AiTool>> {
     return executeWithRetry(async () => {
-      return await db.select().from(aiTools);
+      const limit = options?.limit ?? 50;
+      const offset = options?.offset ?? 0;
+      
+      // Get total count
+      const [countResult] = await db.select({ count: count() }).from(aiTools);
+      const total = countResult?.count ?? 0;
+      
+      // Get paginated data
+      const data = await db.select()
+        .from(aiTools)
+        .limit(limit)
+        .offset(offset);
+      
+      return {
+        data,
+        total,
+        limit,
+        offset
+      };
     });
   }
   

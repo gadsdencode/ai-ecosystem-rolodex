@@ -3,6 +3,7 @@ import { drizzle } from 'drizzle-orm/neon-serverless';
 import ws from "ws";
 import * as schema from "@shared/schema";
 import dotenv from "dotenv";
+import { log } from "./lib/logger";
 
 dotenv.config();
 
@@ -25,7 +26,7 @@ const createPool = () => {
 
   // Handle connection errors
   pool.on('error', (err) => {
-    console.error('Unexpected database error on client:', err);
+    log.error('Unexpected database error on client', err);
     // Don't crash the server on connection errors
   });
 
@@ -57,12 +58,12 @@ export async function executeWithRetry<T>(
       ) {
         if (retries < maxRetries) {
           retries++;
-          console.log(`Database connection error. Retrying ${retries}/${maxRetries} in ${delay}ms...`);
+          log.warn(`Database connection error. Retrying ${retries}/${maxRetries} in ${delay}ms...`);
           await new Promise(resolve => setTimeout(resolve, delay));
           // On connection error, create a new pool for subsequent operations
           // This is crucial for serverless environments where connections can be terminated
           if (pool.totalCount === 0 || pool.idleCount === 0) {
-            console.log('Refreshing connection pool...');
+            log.info('Refreshing connection pool...');
             // Re-initialize the pool
             try {
               await pool.end();

@@ -3,6 +3,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AiTool, AiToolFormData } from '@shared/schema';
 import { apiRequest } from '../lib/queryClient';
 
+// Paginated response from API
+interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
 // Helper function to ensure tags are always an array
 function ensureTagsArray(tags: string | string[]): string[] {
   if (Array.isArray(tags)) {
@@ -16,26 +24,32 @@ function ensureTagsArray(tags: string | string[]): string[] {
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 second
 
-export function useAiTools() {
+export function useAiTools(options?: { limit?: number; offset?: number }) {
   const queryClient = useQueryClient();
+  const [pagination, setPagination] = useState({
+    limit: options?.limit ?? 50,
+    offset: options?.offset ?? 0
+  });
   
-  // Query to fetch all AI tools with retry logic
+  // Build query string for pagination
+  const queryString = `?limit=${pagination.limit}&offset=${pagination.offset}`;
+  
+  // Query to fetch all AI tools with retry logic and pagination
   const { 
-    data: aiTools = [], 
+    data: response, 
     isLoading, 
     error,
     refetch 
   } = useQuery({
-    queryKey: ['/api/tools'],
-    queryFn: () => apiRequest<AiTool[]>('/api/tools'),
+    queryKey: ['/api/tools', pagination],
+    queryFn: () => apiRequest<PaginatedResponse<AiTool>>(`/api/tools${queryString}`),
     retry: MAX_RETRIES,
     retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 30000),
   });
   
-  // Log any errors for debugging
-  if (error) {
-    console.error('API error:', error);
-  }
+  // Extract data from paginated response
+  const aiTools = response?.data ?? [];
+  const total = response?.total ?? 0;
   
   // Mutation to add a new AI tool
   const { mutateAsync: addAiTool, isPending: isAdding } = useMutation({
@@ -124,8 +138,26 @@ export function useAiTools() {
     retryDelay: RETRY_DELAY,
   });
   
+  // Pagination controls
+  const setPage = (page: number) => {
+    setPagination(prev => ({
+      ...prev,
+      offset: page * prev.limit
+    }));
+  };
+  
+  const setPageSize = (newLimit: number) => {
+    setPagination(prev => ({
+      limit: newLimit,
+      offset: 0 // Reset to first page when changing page size
+    }));
+  };
+  
+  const currentPage = Math.floor(pagination.offset / pagination.limit);
+  const totalPages = Math.ceil(total / pagination.limit);
+
   return {
-    aiTools: aiTools as AiTool[], // Type assertion to fix 'unknown' type
+    aiTools,
     isLoading,
     error,
     refetch,
@@ -135,5 +167,17 @@ export function useAiTools() {
     isAdding,
     isUpdating,
     isDeleting,
+    // Pagination
+    pagination: {
+      total,
+      limit: pagination.limit,
+      offset: pagination.offset,
+      currentPage,
+      totalPages,
+      setPage,
+      setPageSize,
+      hasNextPage: currentPage < totalPages - 1,
+      hasPrevPage: currentPage > 0
+    }
   };
 }

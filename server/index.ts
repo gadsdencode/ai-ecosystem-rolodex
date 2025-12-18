@@ -1,14 +1,16 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+import { setupVite, serveStatic, log as viteLog } from "./vite";
 import { storage } from "./storage";
 import cookieParser from "cookie-parser";
+import { xaiRateLimiter, apiRateLimiter, authRateLimiter } from "./middleware/rate-limit";
+import { log } from "./lib/logger";
 
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use((req, _res, next) => {
-  console.log(`${req.method} ${req.path}`);
+  log.http(`${req.method} ${req.path}`);
   next();
 });
 app.use(express.urlencoded({ extended: false }));
@@ -36,12 +38,22 @@ app.use((req, res, next) => {
         logLine = logLine.slice(0, 79) + "…";
       }
 
-      log(logLine);
+      viteLog(logLine);
     }
   });
 
   next();
 });
+
+// Apply rate limiters
+// Strict limit for XAI/AI endpoints (5 req/min)
+app.use('/api/xai', xaiRateLimiter);
+// Moderate limit for auth endpoints (10 req/min)
+app.use('/api/auth', authRateLimiter);
+app.use('/api/saml', authRateLimiter);
+app.use('/api/ssoready-callback', authRateLimiter);
+// General limit for all other API routes (100 req/min)
+app.use('/api', apiRateLimiter);
 
 // Add graceful restart capability
 let serverInstance: any = null;
@@ -52,19 +64,18 @@ const startServer = async (): Promise<void> => {
   try {
     // Initialize database and seed data if needed
     await storage.seedInitialData();
-    log("Database initialized with seed data if needed");
+    log.info("Database initialized with seed data if needed");
     
     const server = await registerRoutes(app);
     serverInstance = server;
 
     // Global error handler - improved with specific error types
+    // SECURITY: Never expose error.message or stack traces to clients
     app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
-      console.error("Error occurred:", err);
+      // Log full error details server-side only
+      log.error("Error occurred", err);
       
-      // Don't expose stack traces in production
-      const isProduction = process.env.NODE_ENV === 'production';
-      
-      // Database connection errors
+      // Database connection errors - log and return generic message
       if (
         err.code === '57P01' || // terminating connection due to administrator command
         err.code === '08006' || // connection terminated
@@ -72,62 +83,67 @@ const startServer = async (): Promise<void> => {
         err.code === '08001' || // connection exception
         (err.message && err.message.includes('connection terminated'))
       ) {
-        console.error("Database connection error:", err);
+        log.error("Database connection error", err);
         return res.status(503).json({ 
-          message: "Database connection error. Please try again in a moment.",
-          error: isProduction ? undefined : err.message,
-          code: err.code
+          message: "Service temporarily unavailable. Please try again."
         });
       }
       
-      // Handle validation errors - usually 400
+      // Handle validation errors - safe to show validation details
       if (err.name === 'ValidationError' || err.name === 'ZodError') {
         return res.status(400).json({ 
-          message: "Invalid input data", 
-          error: isProduction ? undefined : err.message,
-          details: err.details || err.errors
+          message: "Invalid input data",
+          errors: err.errors // Zod errors are safe - they describe input issues, not internal errors
         });
       }
       
       // Handle not found errors - 404
       if (err.name === 'NotFoundError') {
         return res.status(404).json({ 
-          message: err.message || "Resource not found",
-          error: isProduction ? undefined : err.message
+          message: "Resource not found"
         });
       }
       
       // Handle unauthorized - 401
       if (err.name === 'UnauthorizedError') {
         return res.status(401).json({ 
-          message: "Authentication required",
-          error: isProduction ? undefined : err.message
+          message: "Authentication required"
         });
       }
       
       // Handle forbidden - 403
       if (err.name === 'ForbiddenError') {
         return res.status(403).json({ 
-          message: "Access denied",
-          error: isProduction ? undefined : err.message
+          message: "Access denied"
         });
       }
       
-      // Default error handler
+      // Default error handler - NEVER expose internal error details
       const status = err.status || err.statusCode || 500;
-      const message = err.message || "Internal Server Error";
-
-      res.status(status).json({ 
-        message,
-        error: isProduction ? undefined : err.message,
-        code: err.code
-      });
       
-      // Don't throw here - it will crash the server
-      // Instead, log the error and let the request complete
+      // For 500+ errors, always return generic message
       if (status >= 500) {
-        console.error("Unhandled server error:", err);
+        log.error("Unhandled server error", err);
+        return res.status(500).json({ 
+          message: "Internal Server Error"
+        });
       }
+      
+      // For client errors (4xx), return generic message based on status
+      const clientMessages: Record<number, string> = {
+        400: "Bad Request",
+        401: "Unauthorized",
+        403: "Forbidden",
+        404: "Not Found",
+        405: "Method Not Allowed",
+        409: "Conflict",
+        422: "Unprocessable Entity",
+        429: "Too Many Requests"
+      };
+      
+      res.status(status).json({ 
+        message: clientMessages[status] || "Request Error"
+      });
     });
 
     // importantly only setup vite in development and after
@@ -148,20 +164,20 @@ const startServer = async (): Promise<void> => {
       host: "0.0.0.0",
       reusePort: true,
     }, () => {
-      log(`serving on port ${port}`);
+      log.info(`Server started on port ${port}`);
       // Reset restart attempts on successful server start
       restartAttempts = 0;
     });
   } catch (error) {
-    console.error("Failed to initialize application:", error);
+    log.error("Failed to initialize application", error as Error);
     // If we keep failing to start, don't keep trying indefinitely
     if (restartAttempts < MAX_RESTART_ATTEMPTS) {
       restartAttempts++;
-      console.log(`Attempting server restart (${restartAttempts}/${MAX_RESTART_ATTEMPTS})...`);
+      log.warn(`Attempting server restart (${restartAttempts}/${MAX_RESTART_ATTEMPTS})...`);
       // Wait 10 seconds before restarting to allow resources to clean up
       setTimeout(startServer, 10000);
     } else {
-      console.error(`Maximum restart attempts (${MAX_RESTART_ATTEMPTS}) reached. Exiting.`);
+      log.error(`Maximum restart attempts (${MAX_RESTART_ATTEMPTS}) reached. Exiting.`);
       process.exit(1);
     }
   }
@@ -172,10 +188,10 @@ startServer();
 
 // Handle graceful shutdown
 process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully');
+  log.info('SIGTERM received, shutting down gracefully');
   if (serverInstance) {
     serverInstance.close(() => {
-      console.log('Server closed');
+      log.info('Server closed');
       process.exit(0);
     });
   } else {
@@ -184,10 +200,10 @@ process.on('SIGTERM', () => {
 });
 
 process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down gracefully');
+  log.info('SIGINT received, shutting down gracefully');
   if (serverInstance) {
     serverInstance.close(() => {
-      console.log('Server closed');
+      log.info('Server closed');
       process.exit(0);
     });
   } else {
