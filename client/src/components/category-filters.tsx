@@ -58,7 +58,8 @@ export function CategoryFilters({ categories, activeCategory, setActiveCategory 
   };
 
   return (
-    <div className="mb-8 overflow-x-auto scrollbar-hide py-1">
+    <div className="mb-8 overflow-x-auto">
+
       <motion.div 
         className="flex gap-2 pb-1"
         variants={containerVariants}

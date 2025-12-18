@@ -42,9 +42,11 @@ export default function Admin() {
     addAiTool, 
     updateAiTool, 
     deleteAiTool,
+    updateToolStatus,
     isAdding,
     isUpdating,
-    isDeleting
+    isDeleting,
+    isUpdatingStatus
   } = useAiTools();
 
   // Register global keyboard shortcuts
@@ -199,16 +201,9 @@ export default function Admin() {
     }
   }, [error, toast]);
 
-  // Handle changing development status
   const handleChangeStatus = async (tool: AiTool, newStatus: 'production' | 'development') => {
     try {
-      await updateAiTool(tool.id, {
-        ...tool,
-        category: tool.category as CategoryType,
-        provider: tool.provider as ProviderType,
-        iconColor: tool.iconColor as ColorType,
-        developmentStatus: newStatus
-      });
+      await updateToolStatus({ id: tool.id, status: newStatus });
       
       toast({
         title: "Status Updated",

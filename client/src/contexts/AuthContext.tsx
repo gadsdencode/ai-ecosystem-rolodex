@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { initiateSAMLLogin } from '../lib/sso';
 
 interface UserInfo {
   email: string;
@@ -49,6 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       return null;
     } catch (error) {
+      console.error('Error fetching user info:', error);
       return null;
     }
   }, []);
@@ -56,6 +56,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Check if the user is already authenticated and load remembered organization ID and email
   useEffect(() => {
     const checkAuth = async () => {
+      console.log('AuthContext: Checking authentication state');
+      
       // Clean up legacy localStorage keys (migration from old cookie-based auth)
       localStorage.removeItem(STORAGE_KEYS.LEGACY_AUTH_TOKEN);
       localStorage.removeItem(STORAGE_KEYS.LEGACY_USER_EMAIL);
@@ -89,6 +91,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsAuthenticated(false);
       }
       
+      console.log('AuthContext: Final auth state check:', { 
+        isAuthenticated: !!userInfo,
+        hasRememberedOrgId: !!storedOrgId,
+        hasRememberedEmail: !!storedEmail 
+      });
+      
       setIsLoading(false);
     };
     
@@ -96,31 +104,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [fetchUserInfo]);
 
   const login = async (username: string, password: string): Promise<boolean> => {
-    // In a real application, you would make an API call to authenticate the user
-    // For this demo, we'll use hardcoded credentials
-    if (username === 'admin' && password === 'abc123') {
-      // Set demo user info (in production, this would come from the server)
-      setUser({ email: 'admin@demo.local', organizationId: 'demo' });
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        console.error('Login failed:', data.message);
+        return false;
+      }
+      
+      // Refresh user info after successful login
+      const userInfo = await fetchUserInfo();
+      if (userInfo) {
+        setUser(userInfo);
+      }
+      
       setIsAuthenticated(true);
       return true;
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
     }
-    
-    return false;
   };
 
   const loginWithSSO = async (organizationId: string, email?: string): Promise<void> => {
     try {
-      // Remember the organization ID for future logins
       localStorage.setItem(STORAGE_KEYS.REMEMBERED_ORG_ID, organizationId);
       setRememberedOrganizationId(organizationId);
       
-      // Also remember the email if provided
       if (email) {
         localStorage.setItem(STORAGE_KEYS.REMEMBERED_EMAIL, email);
         setRememberedEmail(email);
       }
       
-      // Get the redirect URL from our backend proxy
       const response = await fetch('/api/saml/initiate', {
         method: 'POST',
         headers: {
@@ -128,7 +151,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         },
         body: JSON.stringify({ 
           organizationExternalId: organizationId,
-          email: email // Include email in the request if available
+          email: email
         }),
       });
 
@@ -138,8 +161,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const data = await response.json();
-      
-      // Redirect the user to the identity provider
       window.location.href = data.redirectUrl;
     } catch (error) {
       console.error('Error initiating SSO login:', error);
@@ -149,6 +170,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const handleSSOCallback = async (samlAccessCode: string): Promise<boolean> => {
     try {
+      console.log('Handling SSO callback with access code:', samlAccessCode.substring(0, 10) + '...');
+      
       // Call our backend API to handle the SSO callback
       // The server will set an httpOnly JWT cookie
       const response = await fetch('/api/ssoready-callback', {
@@ -186,6 +209,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsAuthenticated(true);
       return true;
     } catch (error) {
+      console.error('SSO callback error:', error);
       return false;
     }
   };
@@ -198,6 +222,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         credentials: 'include'
       });
     } catch (error) {
+      console.error('Logout error:', error);
       // Continue with local logout even if server call fails
     }
     

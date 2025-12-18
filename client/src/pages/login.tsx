@@ -56,7 +56,7 @@ export default function Login() {
           title: "Login Successful",
           description: "Welcome to the admin dashboard",
         });
-        setLocation('/admin');
+        window.location.href = '/admin';
       } else {
         toast({
           title: "Login Failed",
