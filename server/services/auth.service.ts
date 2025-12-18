@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 import { storage } from '../storage';
 import { generateToken, JWTPayload } from '../middleware/auth';
 
@@ -42,7 +42,7 @@ export async function loginUser(username: string, password: string): Promise<Log
   }
 }
 
-export async function registerUser(username: string, password: string): Promise<RegisterResult> {
+export async function registerUser(username: string, password: string, email?: string): Promise<RegisterResult> {
   try {
     const existingUser = await storage.getUserByUsername(username);
     
@@ -52,9 +52,13 @@ export async function registerUser(username: string, password: string): Promise<
     
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
     
+    // Use provided email or generate one from username
+    const userEmail = email || `${username}@local.dev`;
+    
     const user = await storage.createUser({
       username,
-      password: hashedPassword
+      password: hashedPassword,
+      email: userEmail
     });
     
     return { success: true, userId: user.id };
