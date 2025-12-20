@@ -94,7 +94,7 @@ export async function generateTags(req: Request, res: Response) {
     
     // Use Gemini's native JSON mode for reliability
     const jsonModel = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
+      model: "gemini-2.5-flash",
       generationConfig: { 
         responseMimeType: "application/json",
         responseSchema: {
