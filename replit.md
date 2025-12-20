@@ -35,7 +35,7 @@ Preferred communication style: Simple, everyday language.
 
 2. **Storage Abstraction**: The `IStorage` interface in `server/storage.ts` abstracts database operations, making it easier to swap implementations or add caching.
 
-3. **AI Integration**: xAI (Grok) integration via server-side endpoints for tool suggestions, auto-categorization, and tag generation.
+3. **AI Integration**: Google Gemini integration via server-side endpoints for tool suggestions, auto-categorization, and tag generation.
 
 4. **Protected Routes**: Admin functionality requires authentication; public view is read-only.
 
@@ -58,10 +58,10 @@ Preferred communication style: Simple, everyday language.
 - Default admin user seeded on first run (admin/admin123) - should be changed in production
 
 ### AI Services
-- **xAI (Grok)**: AI-powered features (suggestions, categorization, tagging) via `XAI_API_KEY` environment variable
+- **Google Gemini**: AI-powered features (suggestions, categorization, tagging) via `GEMINI_API_KEY` environment variable
 
 ### Required Environment Variables
 - `DATABASE_URL`: PostgreSQL connection string (required)
 - `JWT_SECRET`: Secret key for JWT signing (required for auth)
-- `XAI_API_KEY`: xAI API key for AI features (optional)
+- `GEMINI_API_KEY`: Google Gemini API key for AI features (optional)
 - `SSOREADY_API_KEY`: SSOReady API key for SAML SSO (optional)
