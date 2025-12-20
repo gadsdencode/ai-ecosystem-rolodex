@@ -1,7 +1,7 @@
 import rateLimit from 'express-rate-limit';
 
 /**
- * Strict rate limiter for XAI/AI endpoints
+ * Strict rate limiter for AI/Gemini endpoints
  * 5 requests per minute per IP
  */
 export const xaiRateLimiter = rateLimit({
@@ -13,10 +13,7 @@ export const xaiRateLimiter = rateLimit({
   },
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  keyGenerator: (req) => {
-    // Use IP address as the key
-    return req.ip || req.socket.remoteAddress || 'unknown';
-  }
+  // Default keyGenerator uses IP address with proper IPv6 handling
 });
 
 /**
@@ -32,14 +29,12 @@ export const apiRateLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => {
-    return req.ip || req.socket.remoteAddress || 'unknown';
-  },
   // Skip rate limiting for certain paths if needed
   skip: (req) => {
     // Skip rate limiting for static assets and health checks
     return req.path.startsWith('/assets') || req.path === '/health';
   }
+  // Default keyGenerator uses IP address with proper IPv6 handling
 });
 
 /**
@@ -55,8 +50,5 @@ export const authRateLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => {
-    return req.ip || req.socket.remoteAddress || 'unknown';
-  }
+  // Default keyGenerator uses IP address with proper IPv6 handling
 });
-
