@@ -25,42 +25,19 @@ export default function Public() {
   
   const [currentTool, setCurrentTool] = useState<AiTool | null>(null);
   
+  // Fetch tools with server-side filtering
   const { 
     aiTools, 
     isLoading, 
     error
-  } = useAiTools();
+  } = useAiTools({
+    limit: 100,
+    search: searchQuery,
+    category: activeCategory
+  });
 
-  // Filter tools by category and search query
-  const filteredTools = aiTools.filter((tool: AiTool) => {
-    // Filter by provider if selected
-    if (activeCategory === 'overture' && tool.provider !== 'overture') {
-      return false;
-    }
-    if (activeCategory === 'third-party' && tool.provider !== 'third-party') {
-      return false;
-    }
-    
-    // Filter by category
-    if (activeCategory !== 'all' && activeCategory !== 'overture' && activeCategory !== 'third-party' && tool.category !== activeCategory) {
-      return false;
-    }
-    
-    // Filter by search query
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      return (
-        tool.name.toLowerCase().includes(query) ||
-        tool.description.toLowerCase().includes(query) ||
-        tool.tags.some((tag: string) => tag.toLowerCase().includes(query)) ||
-        (tool.notes && tool.notes.toLowerCase().includes(query))
-      );
-    }
-    
-    return true;
-  })
-  // Sort to prioritize Kainbridge (first-party) apps first
-  .sort((a, b) => {
+  // Sort tools to prioritize Overture (first-party) apps first
+  const sortedTools = [...aiTools].sort((a, b) => {
     // First sort by provider (overture first)
     if (a.provider === 'overture' && b.provider !== 'overture') return -1;
     if (a.provider !== 'overture' && b.provider === 'overture') return 1;
@@ -129,10 +106,7 @@ export default function Public() {
           </div>
         ) : (
           <PublicAiCardGrid 
-            aiTools={aiTools as AiTool[]}
-            filteredTools={filteredTools as AiTool[]}
-            activeCategory={activeCategory}
-            searchQuery={searchQuery}
+            tools={sortedTools}
             onDetails={handleOpenDetailModal}
           />
         )}
@@ -158,26 +132,39 @@ export default function Public() {
 
 // Modified version of AiCardGrid for the public view
 interface PublicAiCardGridProps {
-  aiTools: AiTool[];
-  filteredTools: AiTool[];
-  activeCategory: string;
-  searchQuery: string;
+  tools: AiTool[];
   onDetails: (tool: AiTool) => void;
 }
 
 function PublicAiCardGrid({
-  aiTools,
-  filteredTools,
-  activeCategory,
-  searchQuery,
+  tools,
   onDetails
 }: PublicAiCardGridProps) {
-  // Show empty state if there are no tools at all, or if filtering returns no results
-  const showEmptyState = aiTools.length === 0;
-  const showFilteredEmptyState = aiTools.length > 0 && filteredTools.length === 0;
-
-  if (showEmptyState) {
-    return <EmptyState onAddNew={() => {}} />;
+  // Show empty state if there are no tools
+  if (tools.length === 0) {
+    return (
+      <motion.div 
+        className="flex flex-col items-center justify-center py-10"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">No tools found</h3>
+          <p className="text-slate-600 dark:text-slate-400 mb-6">
+            No AI tools match your current filters. Try adjusting your search or category selection.
+          </p>
+          <motion.button 
+            className="px-5 py-2.5 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-lg flex items-center mx-auto hover:shadow-brand-lg transition-all duration-200"
+            onClick={() => window.dispatchEvent(new CustomEvent('setCategory', { detail: 'all' }))}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            View all tools
+          </motion.button>
+        </div>
+      </motion.div>
+    );
   }
 
   // Animation variants for the grid container
@@ -192,76 +179,25 @@ function PublicAiCardGrid({
     }
   };
 
-  // Animation variants for the empty state
-  const emptyStateVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      transition: { 
-        duration: 0.5, 
-        ease: "easeOut" 
-      } 
-    },
-    exit: { 
-      opacity: 0, 
-      y: -20, 
-      transition: { 
-        duration: 0.3, 
-        ease: "easeIn" 
-      } 
-    }
-  };
-
   return (
-    <>
-      <AnimatePresence mode="wait">
-        {showFilteredEmptyState ? (
-          <motion.div 
-            className="flex flex-col items-center justify-center py-10"
-            key="empty-state"
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            variants={emptyStateVariants}
-          >
-            <motion.div className="text-center">
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">No tools found</h3>
-              <p className="text-slate-600 dark:text-slate-400 mb-6">
-                No AI tools match your current filters. Try adjusting your search or category selection.
-              </p>
-              <motion.button 
-                className="px-5 py-2.5 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-lg flex items-center mx-auto hover:shadow-brand-lg transition-all duration-200"
-                onClick={() => window.dispatchEvent(new CustomEvent('setCategory', { detail: 'all' }))}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                View all tools
-              </motion.button>
-            </motion.div>
-          </motion.div>
-        ) : (
-          <motion.div 
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-10"
-            key="tools-grid"
-            initial="hidden"
-            animate="visible"
-            variants={gridVariants}
-            layout
-          >
-            <AnimatePresence>
-              {filteredTools.map(tool => (
-                <PublicAiCard 
-                  key={tool.id} 
-                  tool={tool} 
-                  onClick={() => onDetails(tool)}
-                />
-              ))}
-            </AnimatePresence>
-          </motion.div>
-        )}
+    <motion.div 
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-10"
+      key="tools-grid"
+      initial="hidden"
+      animate="visible"
+      variants={gridVariants}
+      layout
+    >
+      <AnimatePresence>
+        {tools.map(tool => (
+          <PublicAiCard 
+            key={tool.id} 
+            tool={tool} 
+            onClick={() => onDetails(tool)}
+          />
+        ))}
       </AnimatePresence>
-    </>
+    </motion.div>
   );
 }
 

@@ -1,12 +1,16 @@
 import { users, type User, type InsertUser, aiTools, AiTool, AiToolFormData } from "@shared/schema";
 import { db, executeWithRetry } from "./db";
-import { eq, count } from "drizzle-orm";
+import { eq, count, ilike, or, and, SQL } from "drizzle-orm";
 import * as bcrypt from 'bcrypt';
 
-// Pagination options interface
+// Pagination and filtering options interface
 export interface PaginationOptions {
   limit?: number;
   offset?: number;
+  search?: string;
+  category?: string;
+  provider?: string;
+  developmentStatus?: string;
 }
 
 // Paginated result interface
@@ -62,15 +66,53 @@ export class DatabaseStorage implements IStorage {
       const limit = options?.limit ?? 50;
       const offset = options?.offset ?? 0;
       
-      // Get total count
-      const [countResult] = await db.select({ count: count() }).from(aiTools);
+      // Build dynamic WHERE conditions
+      const conditions: SQL[] = [];
+      
+      // Search filter: check name, description, or notes
+      if (options?.search && options.search.trim()) {
+        const searchTerm = `%${options.search.trim()}%`;
+        conditions.push(
+          or(
+            ilike(aiTools.name, searchTerm),
+            ilike(aiTools.description, searchTerm),
+            ilike(aiTools.notes, searchTerm)
+          )!
+        );
+      }
+      
+      // Category filter
+      if (options?.category && options.category !== 'all') {
+        conditions.push(eq(aiTools.category, options.category));
+      }
+      
+      // Provider filter
+      if (options?.provider) {
+        conditions.push(eq(aiTools.provider, options.provider));
+      }
+      
+      // Development status filter
+      if (options?.developmentStatus && options.developmentStatus !== 'all') {
+        conditions.push(eq(aiTools.developmentStatus, options.developmentStatus));
+      }
+      
+      // Combine conditions with AND
+      const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+      
+      // Get total count with filters applied
+      const countQuery = db.select({ count: count() }).from(aiTools);
+      if (whereClause) {
+        countQuery.where(whereClause);
+      }
+      const [countResult] = await countQuery;
       const total = countResult?.count ?? 0;
       
-      // Get paginated data
-      const data = await db.select()
-        .from(aiTools)
-        .limit(limit)
-        .offset(offset);
+      // Get paginated and filtered data
+      const dataQuery = db.select().from(aiTools);
+      if (whereClause) {
+        dataQuery.where(whereClause);
+      }
+      const data = await dataQuery.limit(limit).offset(offset);
       
       return {
         data,

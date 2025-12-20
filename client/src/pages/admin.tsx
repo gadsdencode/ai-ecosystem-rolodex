@@ -35,6 +35,7 @@ export default function Admin() {
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
   const [currentTool, setCurrentTool] = useState<AiTool | null>(null);
   
+  // Fetch tools with server-side filtering
   const { 
     aiTools, 
     isLoading, 
@@ -46,8 +47,14 @@ export default function Admin() {
     isAdding,
     isUpdating,
     isDeleting,
-    isUpdatingStatus
-  } = useAiTools();
+    isUpdatingStatus,
+    pagination
+  } = useAiTools({
+    limit: 100,
+    search: searchQuery,
+    category: activeCategory,
+    developmentStatus: activeStatus
+  });
 
   // Register global keyboard shortcuts
   useKeyboardShortcuts({
@@ -55,44 +62,22 @@ export default function Admin() {
     showKeyboardShortcuts: () => setShortcutsModalOpen(true),
   });
 
-  // Filter tools by category, development status, and search query
-  const filteredTools = aiTools.filter((tool: AiTool) => {
-    if (activeStatus !== 'all' && tool.developmentStatus !== activeStatus) {
-      return false;
-    }
-    
-    if (activeCategory === 'overture' && tool.provider !== 'overture') {
-      return false;
-    }
-    if (activeCategory === 'third-party' && tool.provider !== 'third-party') {
-      return false;
-    }
-    
-    if (activeCategory !== 'all' && activeCategory !== 'overture' && activeCategory !== 'third-party' && tool.category !== activeCategory) {
-      return false;
-    }
-    
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      return (
-        tool.name.toLowerCase().includes(query) ||
-        tool.description.toLowerCase().includes(query) ||
-        tool.tags.some((tag: string) => tag.toLowerCase().includes(query)) ||
-        (tool.notes && tool.notes.toLowerCase().includes(query))
-      );
-    }
-    
-    return true;
-  })
-  .sort((a, b) => {
+  // Sort tools to prioritize Overture (first-party) apps first
+  const sortedTools = [...aiTools].sort((a, b) => {
     if (a.provider === 'overture' && b.provider !== 'overture') return -1;
     if (a.provider !== 'overture' && b.provider === 'overture') return 1;
     return a.name.localeCompare(b.name);
   });
 
-  // Status counts
-  const productionCount = aiTools.filter(tool => tool.developmentStatus === 'production').length;
-  const developmentCount = aiTools.filter(tool => tool.developmentStatus === 'development').length;
+  // Status counts - when status is 'all', compute from results; otherwise use pagination total
+  // Note: When a specific status is selected, only that status is fetched from server
+  const allCount = activeStatus === 'all' ? aiTools.length : pagination.total;
+  const productionCount = activeStatus === 'all' 
+    ? aiTools.filter(tool => tool.developmentStatus === 'production').length 
+    : (activeStatus === 'production' ? aiTools.length : 0);
+  const developmentCount = activeStatus === 'all' 
+    ? aiTools.filter(tool => tool.developmentStatus === 'development').length 
+    : (activeStatus === 'development' ? aiTools.length : 0);
 
   // Modal handlers
   const handleOpenAddModal = () => {
@@ -220,7 +205,7 @@ export default function Admin() {
 
   // Status tab data
   const statusTabs = [
-    { id: 'all', label: 'All Tools', count: aiTools.length, icon: Layers },
+    { id: 'all', label: 'All Tools', count: allCount, icon: Layers },
     { id: 'production', label: 'Production', count: productionCount, icon: Server },
     { id: 'development', label: 'In Development', count: developmentCount, icon: Code },
   ];
@@ -313,8 +298,8 @@ export default function Admin() {
           </div>
         ) : (
           <AiCardGrid 
-            aiTools={aiTools as AiTool[]}
-            filteredTools={filteredTools as AiTool[]}
+            aiTools={sortedTools}
+            filteredTools={sortedTools}
             activeCategory={activeCategory}
             searchQuery={searchQuery}
             onEdit={handleOpenEditModal}

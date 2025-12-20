@@ -4,12 +4,18 @@ import { storage } from "../storage";
 import { aiToolFormSchema } from "@shared/schema";
 
 /**
- * GET /api/tools - Get all AI tools with pagination
+ * GET /api/tools - Get all AI tools with pagination and filtering
  */
 export async function getAll(req: Request, res: Response, next: NextFunction) {
   try {
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
     const offset = req.query.offset ? parseInt(req.query.offset as string, 10) : 0;
+    
+    // Extract filter parameters
+    const search = req.query.search as string | undefined;
+    const category = req.query.category as string | undefined;
+    const provider = req.query.provider as string | undefined;
+    const developmentStatus = req.query.developmentStatus as string | undefined;
     
     // Validate pagination params
     if (isNaN(limit) || limit < 1 || limit > 100) {
@@ -19,7 +25,14 @@ export async function getAll(req: Request, res: Response, next: NextFunction) {
       return res.status(400).json({ message: 'Invalid offset. Must be 0 or greater.' });
     }
     
-    const result = await storage.getAllAiTools({ limit, offset });
+    const result = await storage.getAllAiTools({ 
+      limit, 
+      offset, 
+      search, 
+      category, 
+      provider, 
+      developmentStatus 
+    });
     res.json(result);
   } catch (error) {
     next(error);

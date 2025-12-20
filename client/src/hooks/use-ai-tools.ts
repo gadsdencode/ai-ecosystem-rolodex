@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AiTool, AiToolFormData } from '@shared/schema';
 import { apiRequest } from '../lib/queryClient';
@@ -9,6 +9,15 @@ interface PaginatedResponse<T> {
   total: number;
   limit: number;
   offset: number;
+}
+
+// Options interface for the hook
+interface UseAiToolsOptions {
+  limit?: number;
+  offset?: number;
+  search?: string;
+  category?: string;
+  developmentStatus?: string;
 }
 
 // Helper function to ensure tags are always an array
@@ -22,24 +31,60 @@ function ensureTagsArray(tags: string | string[]): string[] {
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000;
 
-export function useAiTools(options?: { limit?: number; offset?: number }) {
+export function useAiTools(options?: UseAiToolsOptions) {
   const queryClient = useQueryClient();
   const [pagination, setPagination] = useState({
     limit: options?.limit ?? 50,
     offset: options?.offset ?? 0
   });
   
-  // Build query string for pagination
-  const queryString = `?limit=${pagination.limit}&offset=${pagination.offset}`;
+  // Determine API parameters based on category value
+  // 'overture' and 'third-party' are provider filters, not category filters
+  const apiParams = useMemo(() => {
+    let categoryParam: string | undefined;
+    let providerParam: string | undefined;
+    
+    if (options?.category === 'overture' || options?.category === 'third-party') {
+      providerParam = options.category;
+      categoryParam = undefined;
+    } else if (options?.category && options.category !== 'all') {
+      categoryParam = options.category;
+      providerParam = undefined;
+    }
+    
+    return { categoryParam, providerParam };
+  }, [options?.category]);
   
-  // Query to fetch all AI tools with retry logic and pagination
+  // Build query string with pagination and filters
+  const queryString = useMemo(() => {
+    const params = new URLSearchParams();
+    params.set('limit', pagination.limit.toString());
+    params.set('offset', pagination.offset.toString());
+    
+    if (options?.search?.trim()) {
+      params.set('search', options.search.trim());
+    }
+    if (apiParams.categoryParam) {
+      params.set('category', apiParams.categoryParam);
+    }
+    if (apiParams.providerParam) {
+      params.set('provider', apiParams.providerParam);
+    }
+    if (options?.developmentStatus && options.developmentStatus !== 'all') {
+      params.set('developmentStatus', options.developmentStatus);
+    }
+    
+    return `?${params.toString()}`;
+  }, [pagination.limit, pagination.offset, options?.search, apiParams.categoryParam, apiParams.providerParam, options?.developmentStatus]);
+  
+  // Query to fetch all AI tools with retry logic, pagination, and filtering
   const { 
     data: response, 
     isLoading, 
     error,
     refetch 
   } = useQuery({
-    queryKey: ['/api/tools', pagination],
+    queryKey: ['/api/tools', pagination, options?.search, options?.category, options?.developmentStatus],
     queryFn: () => apiRequest<PaginatedResponse<AiTool>>(`/api/tools${queryString}`),
     retry: MAX_RETRIES,
     retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 30000),
